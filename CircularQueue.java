@@ -31,7 +31,7 @@ public class CircularQueue {
 		}
 	}
 
-	public void enqueue(int data) {
+	public void enqueue(int data) { //should be datagram
 		if (this.isFull() == true) {
 			// throw overflow error
 			System.out.println("Queue is full, cannot enqueue.");
@@ -53,6 +53,11 @@ public class CircularQueue {
 			System.out.println(data + "is dequeued.");
 			return data;
 		}
+	}
+	
+	public int peekHead(){
+		int data = ringBuffer[head];
+		return data;
 	}
 
 	// use main function to test
