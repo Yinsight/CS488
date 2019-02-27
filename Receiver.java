@@ -68,13 +68,15 @@ public class Receiver {
 			}	
 			
 			//Go through Queue to send ack for datagrams received
-			
 			for(int i=0;i<buffer.maxSize;i++) {
 				int check = buffer.dequeue();			
 				if(check !=0) {							// assuming that no packet has sequence number 0 and we use 0 to allocate space for datagrams not received
-					
+					DatagramPacket ackPacket = new DatagramPacket(check);
+					datagramSocketS.send(ackPacket);
+					System.out.println("Receiver: Sent duplicate Ack " + check);
 				}
 			}
+			
 			
 			
 		datagramSocketL.close(); 
