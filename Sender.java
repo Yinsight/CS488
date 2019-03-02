@@ -35,11 +35,12 @@ public class Sender {
 	 */
 
 	public static void main(String[] args) throws IOException, InterruptedException {
+		CircularQueue buffer = new CircularQueue(3);
 		int seqNumber;
 		File file = new File("./Resource/1.jpg");
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[1024];
-		byte[] seqNumberArray = new byte[Integer.SIZE / 8]; // 4 seqbyte
+		byte[] indexinbyte = new byte[4];
 		byte[] datawithSeq = new byte[1028];
 		// Socket socket = new Socket(host.getHostAddress(), targetPort);
 		DatagramSocket datagramSocket = new DatagramSocket(ownPort);
@@ -49,18 +50,9 @@ public class Sender {
 		while (fis.read(data) != -1) {
 			// socket.getOutputStream().write(data);
 			index++;
-			// seqNumberArray.add(index.toByteArray());
-			// datawithSeq[] =
-			// seqNumberArray[] = convert int to byte array
-			byte indexinbyte = (byte) index;
-			for (byte a = 0; indexinbyte < seqNumberArray.length; a++) {
-				seqNumberArray[a] = a;
-			}
-			//datawithSeq = new byte [data.length + seqNumberArray.length];
-			ByteArrayOutputStream combined = new ByteArrayOutputStream();
-			combined.write(data);
-			combined.write(seqNumberArray);
-			datawithSeq = combined.toByteArray();
+			// byte[] datawithSeq = new byte[1028];
+			System.arraycopy(data, 0, datawithSeq, 0, 1024);
+			System.arraycopy(indexinbyte, 0, datawithSeq, 1024, 4);
 			DatagramPacket packet = new DatagramPacket(data, data.length, host, targetPort);
 			datagramSocket.setSoTimeout(30000);
 			// CircularQueue buffer = new CircularQueue[size];
@@ -73,6 +65,7 @@ public class Sender {
 
 			datagramSocket.send(packet);
 		}
+
 		// add a loop to send ACKs
 		System.out.println("Sender: finished.");
 		datagramSocket.close();
