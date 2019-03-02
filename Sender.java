@@ -50,6 +50,10 @@ public class Sender {
 		while (fis.read(data) != -1) {
 			// socket.getOutputStream().write(data);
 			index++;
+			indexinbyte[0] = (byte) (index >>> 24);
+			indexinbyte[1] = (byte) (index >>> 16);
+			indexinbyte[2] = (byte) (index >>> 8);
+			indexinbyte[3] = (byte) (index);
 			// byte[] datawithSeq = new byte[1028];
 			System.arraycopy(data, 0, datawithSeq, 0, 1024);
 			System.arraycopy(indexinbyte, 0, datawithSeq, 1024, 4);
