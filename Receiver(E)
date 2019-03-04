@@ -1,0 +1,69 @@
+package UDPpackage;
+
+import java.io.*;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.util.Stack;
+
+public class Receiver {
+
+    final static int targetPort = 8888;
+    static InetAddress host = null;
+
+    public static void main(String[] args) throws IOException {
+        File file = new File("1_copy.jpg");
+        FileOutputStream fos = new FileOutputStream(file);
+        byte[] data = new byte[1028]; // size of seq + file data
+        byte[] fileData = new byte[1024]; // size of file data
+        DatagramSocket datagramSocket = new DatagramSocket(targetPort);
+        datagramSocket.setSoTimeout(30000);
+        Stack<Integer> seqIndex = new Stack<>();
+        System.out.println("Receiver: Listening");
+
+        try {
+            host = InetAddress.getByName("localhost");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        boolean running = true;
+
+        while (running) {
+            try {
+                DatagramPacket receivePacket = new DatagramPacket(data, data.length);    // incoming packet
+                datagramSocket.receive(receivePacket);
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+                DataInputStream dataInput = new DataInputStream(inputStream);
+                int seq = dataInput.readInt(); // get seq
+
+                if (seq == -1) { // if seq is -1, means there is no more packets to receive
+                    running = false;
+                    continue;
+                }
+                if (seqIndex.isEmpty() || (seq - 1)  == seqIndex.peek()) { // check if packet received is first or the next one after
+                    byte[] response = intToBytes(seq);                     // the previous in the stack
+
+                    if (dataInput.read(fileData) != -1) { // after successfully writing to file, send back acknowledgement
+                        fos.write(fileData);
+                        datagramSocket.send(new DatagramPacket(response, response.length, receivePacket.getAddress(), receivePacket.getPort()));
+                        System.out.println("Receiver: Sent duplicate Ack " + seq);
+                    }
+                    seqIndex.add(seq);
+                }
+
+
+            } catch (SocketTimeoutException e) {
+                break;
+            }
+        }
+        fos.close(); // close resources when done
+        datagramSocket.close();
+    }
+
+    public static byte[] intToBytes( final int i ) {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.putInt(i);
+        return bb.array();
+    }
+}
+
