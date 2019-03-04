@@ -1,0 +1,68 @@
+package UDPpackage;
+
+import java.io.*;
+import java.net.*;
+import java.nio.ByteBuffer;
+
+public class Sender {
+
+    final static int targetPort = 8888;
+    static InetAddress host = null;
+    static DatagramSocket datagramSocket = null;
+
+    static {
+        try {
+            host = InetAddress.getByName("localhost");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        File file = new File("src/UDPpackage/1.jpg");
+        FileInputStream fis = new FileInputStream(file);
+        byte[] data = new byte[1024];
+
+        int index = 0;
+        datagramSocket = new DatagramSocket();
+        System.out.println("Sender: connection built, about to transfer.");
+        while (fis.read(data) != -1) {
+            index++; // track packet being sent
+
+            ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(byteArray); // used to put data into a byte array
+            out.writeInt(index);
+            out.write(data);
+            byte[] finalData = byteArray.toByteArray();
+            DatagramPacket packet = new DatagramPacket(byteArray.toByteArray(), finalData.length, host, targetPort);
+
+            int resSeq;
+            do {
+                resSeq = sendPacket(packet); // send packet
+            } while (resSeq != index); // if acknowledgment packet received is different from the current packet being tracked, send again
+            System.out.println("Sent packet: " + index);
+        }
+        byte[] end = intToBytes(-1);
+        datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
+    }
+
+    public static int sendPacket(DatagramPacket packet) throws IOException {
+        byte[] response = new byte[4];
+        datagramSocket.setSoTimeout(30000);
+        datagramSocket.send(packet);
+        DatagramPacket resPacket = new DatagramPacket(response, response.length, packet.getAddress(), packet.getPort());
+        datagramSocket.receive(resPacket);
+        return bytesToInt(response); // return acknowledgment
+    }
+
+    public static byte[] intToBytes( final int i ) {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.putInt(i);
+        return bb.array();
+    }
+
+    public static int bytesToInt(final byte[] b) {
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        return bb.getInt();
+    }
+}
