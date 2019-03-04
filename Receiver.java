@@ -52,9 +52,8 @@ public class Receiver {
 			
 					//break down of data - get sequence number
 					//needs to match how sender manages the sequence Number
-					int seqNum = ByteBuffer.wrap(copyOfRange(data, 8, 12)).getInt();
+					seqNum = ByteBuffer.wrap(copyOfRange(data, data.length-5, data.length-1)).getInt();
 					System.out.println("Receiver: Received sequence number: " + seqNum);
-					
 					
 					//add to buffer (Circular Queue)
 					buffer.enqueue(seqNum);
