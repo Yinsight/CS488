@@ -5,9 +5,9 @@ import java.util.Arrays;
 public class CircularQueue {
 
 	int maxSize;
-	int head = 0;
-	int tail = 0;
-	int ringBuffer[];
+	static int head = 0;
+	static int tail = 0;
+	static int ringBuffer[];
 	// need to change abstract type later
 
 	public CircularQueue(int bufferSize) {
@@ -15,7 +15,7 @@ public class CircularQueue {
 		ringBuffer = new int[maxSize];
 	}
 
-	public boolean isFull() {
+	public static boolean isFull() {
 		if (((tail + 1) % maxSize) == head) {
 			return true;
 		} else {
@@ -55,7 +55,7 @@ public class CircularQueue {
 		}
 	}
 	
-	public int peekHead(){
+	public static int peekHead(){
 		int data = ringBuffer[head];
 		return data;
 	}
