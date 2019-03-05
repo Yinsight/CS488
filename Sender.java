@@ -46,7 +46,7 @@ public class Sender {
 		byte[] datawithSeq = new byte[1028];
 		// Socket socket = new Socket(host.getHostAddress(), targetPort);
 		//DatagramSocket datagramSocket = new DatagramSocket(ownPort);
-		datagramSocket = new DatagramSocket;
+		datagramSocket = new DatagramSocket();
 		System.out.println("Sender: connec()tion built, about to transfer.");
 
 		int index = 0;
