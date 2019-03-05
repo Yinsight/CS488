@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class CircularQueue {
 
-	int maxSize;
+	static int maxSize;
 	static int head = 0;
 	static int tail = 0;
 	static int ringBuffer[];
