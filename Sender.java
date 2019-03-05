@@ -76,10 +76,20 @@ public class Sender {
                         resSeq = sendPacket(packet); // send packet
                         System.out.println("Sent packet: " + index);
                 
-                        while (resSeq != index){
-                	    resSeq = sendPacket(packet);
-                	    System.out.println("Resending packet.");// if acknowledgment packet received is different from the current packet being tracked, send again
-                }
+		      /* datagramSocket.setSoTimeout(10000);		//tries to receive ACK packet
+			DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length);
+			try { 
+				datagramSocket.receive(ackPacket);
+				ackNum = receive(ackPacket);
+				while (ackNum != index){	// if acknowledgment packet received is different from the current packet being tracked, send again
+
+				System.out.println("Resending packet.");
+			    }
+
+		       } catch (SocketTimeoutException e) {
+			  sendPacket(packet); 
+		       }
+		       */			       
                 
              	         byte[] end = intToBytes(-1); //update array
                          datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
