@@ -17,6 +17,8 @@ public class Sender {
 	final static int ownPort = 7777;
 	final static int targetPort = 8888;
 	static InetAddress host = null;
+	static DatagramSocket datagramSocket = null;
+	static boolean check = true;
 	static {
 		try {
 			host = InetAddress.getByName("localhost");
@@ -43,21 +45,58 @@ public class Sender {
 		byte[] indexinbyte = new byte[4];
 		byte[] datawithSeq = new byte[1028];
 		// Socket socket = new Socket(host.getHostAddress(), targetPort);
-		DatagramSocket datagramSocket = new DatagramSocket(ownPort);
-		System.out.println("Sender: connection built, about to transfer.");
+		//DatagramSocket datagramSocket = new DatagramSocket(ownPort);
+		datagramSocket = new DatagramSocket;
+		System.out.println("Sender: connec()tion built, about to transfer.");
 
 		int index = 0;
 		while (fis.read(data) != -1) {
 			// socket.getOutputStream().write(data);
 			index++;
-			indexinbyte[0] = (byte) (index >>> 24);
+			ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+          	        DataOutputStream out = new DataOutputStream(byteArray); // used to put data into a byte array
+                        out.writeInt(index);
+                        out.write(data);
+                        byte[] finalData = byteArray.toByteArray();
+			/*indexinbyte[0] = (byte) (index >>> 24);
 			indexinbyte[1] = (byte) (index >>> 16);
 			indexinbyte[2] = (byte) (index >>> 8);
 			indexinbyte[3] = (byte) (index);
+			
 			// byte[] datawithSeq = new byte[1028];
 			System.arraycopy(data, 0, datawithSeq, 0, 1024);
 			System.arraycopy(indexinbyte, 0, datawithSeq, 1024, 4);
+			*/
 			DatagramPacket packet = new DatagramPacket(data, data.length, host, targetPort);
+			
+			int resSeq;
+			
+			while(check = true) {
+        	        for(int i=0; i<3; i++) { // window size
+                        resSeq = sendPacket(packet); // send packet
+                        System.out.println("Sent packet: " + index);
+                
+                        while (resSeq != index){
+                	    resSeq = sendPacket(packet);
+                	    System.out.println("Resending packet.");// if acknowledgment packet received is different from the current packet being tracked, send again
+                }
+                
+             	         byte[] end = intToBytes(-1); //update array
+                         datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
+                
+            	         if(i == 3) {	
+                         System.out.println("ACKs verfied. Window sliding.");
+            	       	 i=0;
+             }
+            		}	
+            	}					
+            }
+			System.out.println("Sender: finished.");
+			datagramSocket.close();
+			fis.close();
+	}
+			public static int sendPacket(DatagramPacket packet) throws IOException {
+        		byte[] response = new byte[4];
 			datagramSocket.setSoTimeout(30000);
 			// CircularQueue buffer = new CircularQueue[size];
 			// buffer.enqueue();
@@ -68,14 +107,22 @@ public class Sender {
 			// seq ++;
 
 			datagramSocket.send(packet);
+			DatagramPacket resPacket = new DatagramPacket(response, response.length, packet.getAddress(), packet.getPort());
+        		datagramSocket.receive(resPacket);
+        		return bytesToInt(response); // return acknowledgment
 		}
 
-		// add a loop to send ACKs
-		System.out.println("Sender: finished.");
-		datagramSocket.close();
-		fis.close();
-	}
+		
 
-	// array of acknowledgement
+			public static byte[] intToBytes( final int i ) {
+			ByteBuffer bb = ByteBuffer.allocate(3);
+			bb.putInt(i);
+			return bb.array();
+		    }
+
+			public static int bytesToInt(final byte[] b) {
+			ByteBuffer bb = ByteBuffer.wrap(b);
+			return bb.getInt();
+    }
 
 }
