@@ -62,6 +62,13 @@ public class CircularQueue {
 		return data;
 	}
 	
+	//Should peek at element at a particular index
+	public DatagramPacket peek(int index) {
+       DatagramPacket data=ringBuffer[index];
+        
+        return data;
+	}
+	
 	void print()
     {
         for(int i=head;i<=tail;i++)
