@@ -14,25 +14,19 @@ import lab1.cs488.pace.edu.CircularQueue;
 
 public class Receiver {
 	
-	final static int targetPort = 7777;
-	final static int ownPort = 8888;
-	static int seqNum = 0;                 // datagram sequence number
-	static InetAddress host = null;
-	
-	public static void main(String[] args) throws IOException {
-		
-		// Initializing buffer of size 3
+			// Initializing buffer of size 3
 			CircularQueue buffer= new CircularQueue(3);
 		
 			File file = new File("./Resource/copy_1_udp.jpg");
 			FileOutputStream fis = new FileOutputStream(file);
-		        byte[] data = new byte[1024];
-		    
+			byte[] data = new byte[1028]; //size of seq + file data
+			byte[] fileData = new byte[1024]; //size of file data
 			DatagramSocket datagramSocketL = new DatagramSocket(targetPort);    //to receive datagrams
 			DatagramSocket datagramSocketS = new DatagramSocket();				 // to send ack
 			datagramSocketL.setSoTimeout(30000);
 			System.out.println("Receiver: Listening");
 			
+		    int expected=1;
 			
 			try {
 				host = InetAddress.getByName("localhost");
@@ -43,7 +37,7 @@ public class Receiver {
 			
 			//boolean running = true;
 			
-			while(!buffer.isFull()) {
+			while(buffer.isEmpty()) {
 				System.out.println("Enter While loop");
 				try {
 					DatagramPacket receivePacket = new DatagramPacket(data, data.length);	// incoming packet
@@ -51,12 +45,20 @@ public class Receiver {
 			
 					//break down of data - get sequence number				
 					//needs to match how sender manages the sequence Number
-					seqNum = ByteBuffer.wrap(copyOfRange(data, data.length-5, data.length-1)).getInt();
+					seqNum= ByteBuffer.wrap(copyOfRange(data, data.length-4, data.length)).getInt();
 					System.out.println("Receiver: Received sequence number: " + seqNum);
 					
+					if(expected==seqNum) {
+						buffer.enqueue(receivePacket);		// make changes to circular queue
+					}
+					else {
+						
+						DatagramPacket dummyPacket = new DatagramPacket(intToBytes(-1),intToBytes(-1).length);
+						buffer.enqueue(dummyPacket);
+					}
+					expected++;
 					
 					//add to buffer (Circular Queue)
-					buffer.enqueue(seqNum);
 					
 										
 				}
@@ -66,16 +68,33 @@ public class Receiver {
 			
 			}	
 			
-			//Go through Queue to send ack for datagrams received
-			for(int i=0;i<buffer.maxSize;i++) {
-				int check = buffer.peekHead();			
-				if(check !=0) {							// assuming that no packet has sequence number 0 and we use 0 to allocate space for datagrams not received
-					byte[] ackNumBytes = ByteBuffer.allocate(4).putInt(check).array();
+					
+
+				for(int i=0;i<buffer.maxSize;i++) {		
+				//check if packet was received and send ack
+				byte[] check = new byte[1028];
+				DatagramPacket checkPacket = new DatagramPacket(check,check.length);
+				checkPacket=buffer.peekHead();
+						
+				int v = bytesToInt(check);
+				System.out.println(v);
+
+					// Send ack for all datagrams that are valid
+					if(v!=-1) {
+					// Recover seqNum from datagram and send ack
+					byte[] ackNumBytes = copyOfRange(data, data.length-4, data.length);
 					DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length, host, targetPort);
 					datagramSocketS.send(ackPacket);
-					System.out.println("Receiver: Sent duplicate Ack " + check);
-				}
-			}
+					System.out.println("Receiver: Sent Acknowledgement" + v);
+					}
+					
+					while (v!=-1) {
+							buffer.dequeue();
+							fis.write(check);
+					}
+					}
+					
+					
 			
 			
 			
@@ -84,7 +103,16 @@ public class Receiver {
 		fis.close();
 		
 	}
-		
+	
+	public static byte[] intToBytes( final int i ) {
+		ByteBuffer bb = ByteBuffer.allocate(4);
+		bb.putInt(i);
+		return bb.array();
+	}
+	
+	public static int bytesToInt( byte[] v) {
+		return ByteBuffer.wrap(v).getInt();
+	}
 	
 	public static byte[] copyOfRange(byte[] srcArr, int start, int end){
 		int length = (end > srcArr.length)? srcArr.length-start: end-start;
