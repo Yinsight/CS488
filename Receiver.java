@@ -14,7 +14,17 @@ import lab1.cs488.pace.edu.CircularQueue;
 
 public class Receiver {
 	
-			// Initializing buffer of size 3
+	final static int targetPort = 7777;
+	final static int ownPort = 8888;
+	static int seqNum = 0;                 // datagram sequence number
+	static InetAddress host = null;
+	
+	
+			
+		
+	public static void main(String[] args) throws IOException {
+		
+		// Initializing buffer of size 3
 			CircularQueue buffer= new CircularQueue(3);
 		
 			File file = new File("./Resource/copy_1_udp.jpg");
@@ -74,7 +84,7 @@ public class Receiver {
 				//check if packet was received and send ack
 				byte[] check = new byte[1028];
 				DatagramPacket checkPacket = new DatagramPacket(check,check.length);
-				checkPacket=buffer.peekHead();
+				checkPacket=buffer.peek(i);
 						
 				int v = bytesToInt(check);
 				System.out.println(v);
@@ -86,14 +96,24 @@ public class Receiver {
 					DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length, host, targetPort);
 					datagramSocketS.send(ackPacket);
 					System.out.println("Receiver: Sent Acknowledgement" + v);
+					
 					}
 					
-					while (v!=-1) {
-							buffer.dequeue();
-							fis.write(check);
-					}
 					}
 					
+				byte[] check = new byte[1028];
+				DatagramPacket checkPacket = new DatagramPacket(check,check.length);
+				checkPacket=buffer.peekHead();
+				int v = bytesToInt(check);
+				
+				while (!(buffer.isEmpty()) && v!=-1) {
+						buffer.dequeue();
+						fis.write(check);
+						byte[] checkn = new byte[1028];
+						DatagramPacket checkPacketn = new DatagramPacket(check,check.length);
+						checkPacket=buffer.peekHead();
+						v = bytesToInt(checkn);
+				}
 					
 			
 			
@@ -121,4 +141,5 @@ public class Receiver {
 		return seqArr;
 	}
 }
+
 	
