@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import lab1.cs488.pace.edu.CircularQueue;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 public class Sender {
 	// int datagramBuffer[] = new int[];
@@ -18,7 +20,6 @@ public class Sender {
 	final static int targetPort = 8888;
 	static InetAddress host = null;
 	static DatagramSocket datagramSocket = null;
-	static boolean check = true;
 	static {
 		try {
 			host = InetAddress.getByName("localhost");
@@ -40,92 +41,83 @@ public class Sender {
 		CircularQueue buffer = new CircularQueue(3);
 		int seqNumber;
 		File file = new File("./Resource/1.jpg");
-		FileInputStream fis = new FileInputStream(file);
+		RandomAccessFile fis = new RandomAccessFile(file, "r");
 		byte[] data = new byte[1024];
-		byte[] indexinbyte = new byte[4];
-		byte[] datawithSeq = new byte[1028];
-		// Socket socket = new Socket(host.getHostAddress(), targetPort);
-		//DatagramSocket datagramSocket = new DatagramSocket(ownPort);
-		datagramSocket = new DatagramSocket();
-		System.out.println("Sender: connec()tion built, about to transfer.");
+		HashSet<Integer> hashTable = new HashSet<>();
+		ArrayList<Integer> window = new ArrayList<>();
+		ArrayList<DatagramPacket> packets = new ArrayList<>();
+		int WINDOW_SIZE = 3;
 
 		int index = 0;
+		datagramSocket = new DatagramSocket();
+		System.out.println("Sender: connection built, about to transfer.");
+		int ack = 0;
 		while (fis.read(data) != -1) {
-			// socket.getOutputStream().write(data);
-			index++;
-			ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-          	        DataOutputStream out = new DataOutputStream(byteArray); // used to put data into a byte array
-                        out.writeInt(index);
-                        out.write(data);
-                        byte[] finalData = byteArray.toByteArray();
-			/*indexinbyte[0] = (byte) (index >>> 24);
-			indexinbyte[1] = (byte) (index >>> 16);
-			indexinbyte[2] = (byte) (index >>> 8);
-			indexinbyte[3] = (byte) (index);
-			
-			// byte[] datawithSeq = new byte[1028];
-			System.arraycopy(data, 0, datawithSeq, 0, 1024);
-			System.arraycopy(indexinbyte, 0, datawithSeq, 1024, 4);
-			*/
-			DatagramPacket packet = new DatagramPacket(data, data.length, host, targetPort);
-			
-			int resSeq;
-			
-			while(check = true) {
-        	        for(int i=0; i<3; i++) { // window size
-                        resSeq = sendPacket(packet); // send packet
-                        System.out.println("Sent packet: " + index);
-                
-		      /* datagramSocket.setSoTimeout(10000);		//tries to receive ACK packet
-			DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length);
-			try { 
-				datagramSocket.receive(ackPacket);
-				ackNum = receive(ackPacket);
-				while (ackNum != index){	// if acknowledgment packet received is different from the current packet being tracked, send again
+			if (window.size() < WINDOW_SIZE) {
+                index++; // track packet being sent'
+                ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(byteArray); // used to put data into a byte array
+                out.writeInt(index);
+                out.write(data);
+                byte[] finalData = byteArray.toByteArray();
+                DatagramPacket packet = new DatagramPacket(byteArray.toByteArray(), finalData.length, host, targetPort);
+                window.add(index);
+                packets.add(packet);
+                sendPacket(packet);
+                System.out.println("Sent packet: " + index);
+            } else {
+                // Once window is full, wait for receiver to send acknowledgement for next packet
+                // Check if all the packets in winow have been received
+                if (allPacketsInHashTable(window, hashTable)) {
+                    window.clear();
+                    packets.clear();
+                    continue;
+                }
 
-				System.out.println("Resending packet.");
-			    }
+                fis.seek(index * 1024); // Keep file reader at current position
 
-		       } catch (SocketTimeoutException e) {
-			  sendPacket(packet); 
-		       }
-		       */			       
-                
-             	         byte[] end = intToBytes(-1); //update array
-                         datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
-                
-            	         if(i == 3) {	
-                         System.out.println("ACKs verfied. Window sliding.");
-            	       	 i=0;
-             }
-            		}	
-            	}					
-            }
-			System.out.println("Sender: finished.");
-			datagramSocket.close();
-			fis.close();
-	}
-			public static int sendPacket(DatagramPacket packet) throws IOException {
-        		byte[] response = new byte[4];
-			datagramSocket.setSoTimeout(30000);
-			// CircularQueue buffer = new CircularQueue[size];
-			// buffer.enqueue();
-
-			// Do the following for Project 1:
-			// implement ReliableDatagramPacket extends DatagramPacket
-			// [seq number|packet]
-			// seq ++;
-
-			datagramSocket.send(packet);
-			DatagramPacket resPacket = new DatagramPacket(response, response.length, packet.getAddress(), packet.getPort());
-        		datagramSocket.receive(resPacket);
-        		return bytesToInt(response); // return acknowledgment
+                try {
+                    byte[] response = new byte[4];
+                    DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
+                    datagramSocket.setSoTimeout(10000);
+                    datagramSocket.receive(resPacket);
+                    ack = bytesToInt(response);
+                    hashTable.add(ack);
+                    System.out.println("Received ack: " + ack);
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Resending packets");
+                    for (int i = 0; i < window.size(); i++) {
+                        if (!hashTable.contains(window.get(i))) {
+                            // Resend missing packets
+                            sendPacket(packets.get(i));
+                            System.out.println("Resent packet: " + window.get(i));
+                        }
+                    }
 		}
 
+            	}					
+            }
+		 byte[] end = intToBytes(-1);
+       		 datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
+	}
+		
+		 public static boolean allPacketsInHashTable(ArrayList<Integer> window, HashSet<Integer> hashTable) {
+       			 for (Integer integer : window) {
+         	 		  if (!hashTable.contains(integer)) {
+             			      return false;
+       		     }
+      	  }
+        return true;
+    }
+
+    public static void sendPacket(DatagramPacket packet) throws IOException {
+        datagramSocket.setSoTimeout(30000);
+        datagramSocket.send(packet);
+    }
 		
 
 			public static byte[] intToBytes( final int i ) {
-			ByteBuffer bb = ByteBuffer.allocate(3);
+			ByteBuffer bb = ByteBuffer.allocate(4);
 			bb.putInt(i);
 			return bb.array();
 		    }
