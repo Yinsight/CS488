@@ -1,21 +1,23 @@
 package lab1.cs488.pace.edu;
 
-import java.util.Arrays;
+
+import java.net.DatagramPacket;
+
 
 public class CircularQueue {
 
-	static int maxSize;
-	static int head = 0;
-	static int tail = 0;
-	static int ringBuffer[];
+	 int maxSize;
+	 int head = 0;
+	 int tail = 0;
+	 DatagramPacket ringBuffer[];
 	// need to change abstract type later
 
 	public CircularQueue(int bufferSize) {
 		maxSize = bufferSize;
-		ringBuffer = new int[maxSize];
+		ringBuffer = new DatagramPacket[maxSize];
 	}
 
-	public static boolean isFull() {
+	public boolean isFull() {
 		if (((tail + 1) % maxSize) == head) {
 			return true;
 		} else {
@@ -31,7 +33,7 @@ public class CircularQueue {
 		}
 	}
 
-	public void enqueue(int data) { //should be datagram
+	public void enqueue( DatagramPacket data) {
 		if (this.isFull() == true) {
 			// throw overflow error
 			System.out.println("Queue is full, cannot enqueue.");
@@ -42,24 +44,34 @@ public class CircularQueue {
 		}
 	}
 
-	public int dequeue() {
+	public DatagramPacket dequeue() {
 		if (this.isEmpty() == true) {
 			// throw underflow error
 			System.out.println("Queue is empty, cannot dequeue.");
-			return -1;
+			return null;
 		} else {
-			int data = ringBuffer[head];
+			DatagramPacket data = ringBuffer[head];
 			head = (head + 1) % maxSize;
 			System.out.println(data + "is dequeued.");
 			return data;
 		}
 	}
 	
-	public static int peekHead(){
-		int data = ringBuffer[head];
+	public DatagramPacket peekHead(){
+		DatagramPacket data = ringBuffer[head];
 		return data;
 	}
+	
+	void print()
+    {
+        for(int i=head;i<=tail;i++)
+        {
+         System.out.print(ringBuffer[i]+" ");  
+        }
+         System.out.println();  
+    }
 
 	// use main function to test
 
 }
+
