@@ -20,7 +20,7 @@ public class Sender {
 	final static int targetPort = 8888;
 	static InetAddress host = null;
 	static HashSet<Integer> hashTable = new HashSet<>();
-	static ArrayList<DatagramPacket> packets = new ArrayList<>(); 
+	static ArrayList<DatagramPacket> packets = new ArrayList<>();
 	static DatagramSocket datagramSocket = null;
 	static {
 		try {
@@ -48,7 +48,7 @@ public class Sender {
 		RandomAccessFile fis = new RandomAccessFile(file, "r");
 		byte[] data = new byte[1024];
 
-		int index = 0;
+		int index = 1;
 		datagramSocket = new DatagramSocket();
 		System.out.println("Sender: connection built, about to transfer.");
 
@@ -56,7 +56,14 @@ public class Sender {
 		while (fis.read(data) != -1) {
 			while (!buffer.isFull()) {
 				ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-				DataOutputStream out = new DataOutputStream(byteArray); // used to put data into a byte array
+				DataOutputStream out = new DataOutputStream(byteArray); // used
+																		// to
+																		// put
+																		// data
+																		// into
+																		// a
+																		// byte
+																		// array
 				byte[] finalData = byteArray.toByteArray();
 				DatagramPacket packet = new DatagramPacket(byteArray.toByteArray(), finalData.length, host, targetPort);
 				buffer.enqueue(packet);
@@ -64,31 +71,30 @@ public class Sender {
 				sendPacket(packet);
 				index++;
 				System.out.println("Sent packet: " + index);
-			} 	System.out.println("Resent packet: " + buffer.peek(i));
-						}
-
-			while(true) {
-					datagramSocket.setSoTimeout(30000);
-					try {
-						byte[] response = new byte[4];
-						DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
-						datagramSocket.receive(resPacket);	//receiving ACK packet
-						ack = bytesToInt(response);
-						hashTable.add(ack);
-						System.out.println("Received ack: " + ack);
-				} catch (SocketTimeoutException e) {
-					break;
-				};
 			}
-	}
-}
+		}
 
-public static boolean allPacketsInHashTable(CircularQueue<?> buffer, HashSet<Integer> hashTable) {
+		while (true) {
+			datagramSocket.setSoTimeout(30000);
+			try {
+				byte[] response = new byte[4];
+				DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
+				datagramSocket.receive(resPacket); // receiving ACK packet
+				ack = bytesToInt(response);
+				hashTable.add(ack);
+				System.out.println("Received ack: " + ack);
+			} catch (SocketTimeoutException e) {
+				break;
+			}
+			;
+		}
+	}
+
+	public static boolean allPacketsInHashTable(CircularQueue<?> buffer, HashSet<Integer> hashTable) {
 		for (DatagramPacket packet : packets) {
 			if (hashTable.contains(packets)) {
-				buffer.dequeue(); //ack received and verified 
-			}
-			else {
+				buffer.dequeue(); // ack received and verified
+			} else {
 				return false;
 			}
 		}
