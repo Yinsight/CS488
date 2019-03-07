@@ -20,7 +20,7 @@ public class CircularQueueTest {
 	}
 
 	public boolean isEmpty() {
-		if (tail == head) {
+		if (tail == head && tail == -1) {
 			return true;
 		} else {
 			return false;
@@ -31,11 +31,11 @@ public class CircularQueueTest {
 		if (this.isFull() == true) {
 			// throw overflow error
 			System.out.println("Queue is full, cannot enqueue.");
-		}
-		// else if (this.isEmpty() == true) {
-		// ringBuffer[head] = data;
-		// }
-		else {
+		} else {
+
+			if (tail == head && head == -1) {
+				head += 1;
+			}
 			tail = (tail + 1) % maxSize;
 			ringBuffer[tail] = data;
 			System.out.println(data + "is enqueued.");
@@ -49,7 +49,12 @@ public class CircularQueueTest {
 			return -1;
 		} else {
 			int data = ringBuffer[head];
+			if (tail == head){
+				tail = -1;
+				head = -1;
+			} else {
 			head = (head + 1) % maxSize;
+			}
 			System.out.println(data + "is dequeued.");
 			return data;
 		}
@@ -77,7 +82,13 @@ public class CircularQueueTest {
 		buffer.print();
 		buffer.enqueue(3);
 		buffer.print();
-
+		buffer.dequeue();
+		buffer.print();
+		buffer.dequeue();
+		buffer.print();
+		buffer.dequeue();
+		buffer.print();
+		buffer.peekHead();
 	}
 
 }
