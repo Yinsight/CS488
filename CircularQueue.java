@@ -37,7 +37,11 @@ public class CircularQueue {
 		if (this.isFull() == true) {
 			// throw overflow error
 			System.out.println("Queue is full, cannot enqueue.");
-		} else {
+		}
+		else if(this.isEmpty()) {
+			ringBuffer[head]=data;
+		}		
+		else {
 			tail = (tail + 1) % maxSize;
 			ringBuffer[tail] = data;
 			System.out.println(data + "is enqueued.");
