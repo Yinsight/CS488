@@ -19,6 +19,7 @@ public class Sender {
 	final static int ownPort = 7777;
 	final static int targetPort = 8888;
 	static InetAddress host = null;
+	static HashSet<Integer> hashTable = new HashSet<>();
 	static DatagramSocket datagramSocket = null;
 	static {
 		try {
@@ -29,13 +30,15 @@ public class Sender {
 		}
 	}
 
-	/*
-	 * protected RDatagramPacket extends DatagramPacket{ RDatagramPacket
-	 * rdatagramPacket = new RDatagramPacket(seqNumber); }
-	 * 
-	 * protected RDatagramSocket extends DatagramSocket{ RDatagramSocket
-	 * rdatagramSocket = new RDatagramSocket(); }
-	 */
+	// define isAcked function
+	public static boolean isAcked(byte[] data) {
+		int seq = bytesToInt(copyOfRange(data, 0, 4));
+		if (hashTable.contains(seq)) {
+			hashTable.remove(seq);
+			return true;
+		}
+		return false;
+	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		CircularQueue buffer = new CircularQueue(3);
@@ -43,13 +46,13 @@ public class Sender {
 		File file = new File("./Resource/1.jpg");
 		RandomAccessFile fis = new RandomAccessFile(file, "r");
 		byte[] data = new byte[1024];
-		HashSet<Integer> hashTable = new HashSet<>();
 		ArrayList<DatagramPacket> packets = new ArrayList<>();
 		int WINDOW_SIZE = 3;
 
 		int index = 0;
 		datagramSocket = new DatagramSocket();
 		System.out.println("Sender: connection built, about to transfer.");
+
 		int ack = 0;
 		while (fis.read(data) != -1) {
 			if (window.size() < WINDOW_SIZE) {
@@ -103,7 +106,14 @@ public class Sender {
 				}
 
 			}
-		}
+
+			int i = 0;
+			while (i < buffer.maxSize && isAcked((byte[]) buffer.peek(i))) {
+				buffer.dequeue();
+				i++;
+			}
+		} // while part of the do-while loop
+
 		byte[] end = intToBytes(-1);
 		datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
 	}
@@ -128,9 +138,14 @@ public class Sender {
 		return bb.array();
 	}
 
-	public static int bytesToInt(final byte[] b) {
-		ByteBuffer bb = ByteBuffer.wrap(b);
-		return bb.getInt();
+	public static int bytesToInt(byte[] v) {
+		return ByteBuffer.wrap(v).getInt();
 	}
 
+	public static byte[] copyOfRange(byte[] srcArr, int start, int end) {
+		int length = (end > srcArr.length) ? srcArr.length - start : end - start;
+		byte[] seqArr = new byte[length];
+		System.arraycopy(srcArr, start, seqArr, 0, length);
+		return seqArr;
+	}
 }
