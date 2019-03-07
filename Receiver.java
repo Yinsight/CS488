@@ -25,7 +25,7 @@ public class Receiver {
 	public static void main(String[] args) throws IOException {
 		
 		// Initializing buffer of size 3
-			CircularQueue buffer= new CircularQueue(3);
+			CircularQueue<byte[]> buffer= new CircularQueue<byte[]>(3);
 		
 			File file = new File("./Resource/copy_1_udp.jpg");
 			FileOutputStream fis = new FileOutputStream(file);
@@ -62,12 +62,11 @@ public class Receiver {
 					
 					if(expected==seqNum) {
 						System.out.println("Yes");
-						buffer.enqueue(receivePacket);		// make changes to circular queue
+						buffer.enqueue(data);		// make changes to circular queue
 					}
 					else {
 						
-						DatagramPacket dummyPacket = new DatagramPacket(intToBytes(-1),intToBytes(-1).length);
-						buffer.enqueue(dummyPacket);
+						buffer.enqueue(intToBytes(-1));
 					}
 					expected++;
 					
@@ -88,8 +87,7 @@ public class Receiver {
 				for(int i=0;i<buffer.maxSize;i++) {		
 				//check if packet was received and send ack
 				byte[] check = new byte[1028];
-				DatagramPacket checkPacket = new DatagramPacket(check,check.length);
-				datagramSocketR.receive(buffer.peek(i));
+				check=(byte[])buffer.peek(i);
 				
 				
 						
@@ -108,20 +106,19 @@ public class Receiver {
 					
 					}
 					
+				byte[] checkn = new byte[1028];
 				byte[] check = new byte[1028];
-				DatagramPacket checkPacket = new DatagramPacket(check,check.length);
-				checkPacket=buffer.peekHead();
+				check=(byte[])buffer.peekHead();
 				int v = bytesToInt(check);
 				
 				while (!(buffer.isEmpty()) && v!=-1) {
-						byte[] checkn = new byte[1028];
-						DatagramPacket checkPacketn = new DatagramPacket(check,check.length);
-						checkPacket=buffer.peekHead();
-						v = bytesToInt(checkn);
-						buffer.dequeue();
+						checkn =(byte[])buffer.dequeue();
 						fis.write(checkn);
+						checkn=(byte[])buffer.peekHead();
+						v = bytesToInt(checkn);
+						
 
-				}
+				} 
 					
 			
 			
