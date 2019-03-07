@@ -1,8 +1,8 @@
 public class CircularQueueTest {
 
 	int maxSize;
-	int head = 0;
-	int tail = 0;
+	int head = -1;
+	int tail = -1;
 	int ringBuffer[];
 	// need to change abstract type later
 
@@ -31,9 +31,11 @@ public class CircularQueueTest {
 		if (this.isFull() == true) {
 			// throw overflow error
 			System.out.println("Queue is full, cannot enqueue.");
-		} else if (this.isEmpty() == true) {
-			ringBuffer[head] = data;
-		} else {
+		}
+		// else if (this.isEmpty() == true) {
+		// ringBuffer[head] = data;
+		// }
+		else {
 			tail = (tail + 1) % maxSize;
 			ringBuffer[tail] = data;
 			System.out.println(data + "is enqueued.");
@@ -57,24 +59,25 @@ public class CircularQueueTest {
 		int data = ringBuffer[head];
 		return data;
 	}
-	
-	void print()
-    {
-        for(int i=0;i<3;i++)
-        {
-         System.out.print(ringBuffer[i]+" ");  
-        }
-         System.out.println();  
-    }
+
+	void print() {
+		for (int i = 0; i < 3; i++) {
+			System.out.print(ringBuffer[i] + " ");
+		}
+		System.out.println();
+	}
 
 	public static void main(String args[]) {
 
 		CircularQueueTest buffer = new CircularQueueTest(3);
 
 		buffer.enqueue(1);
-		buffer.enqueue(2);
-		buffer.enqueue(3);
-
 		buffer.print();
+		buffer.enqueue(2);
+		buffer.print();
+		buffer.enqueue(3);
+		buffer.print();
+
 	}
+
 }
