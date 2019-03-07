@@ -33,6 +33,7 @@ public class Receiver {
 			byte[] fileData = new byte[1024]; //size of file data
 			DatagramSocket datagramSocketL = new DatagramSocket(ownPort);    //to receive datagrams
 			DatagramSocket datagramSocketS = new DatagramSocket();				 // to send ack
+			DatagramSocket datagramSocketR = new DatagramSocket();
 			datagramSocketL.setSoTimeout(30000);
 			System.out.println("Receiver: Listening");
 			
@@ -69,7 +70,7 @@ public class Receiver {
 						buffer.enqueue(dummyPacket);
 					}
 					expected++;
-					buffer.print();
+					
 					//add to buffer (Circular Queue)
 					
 										
@@ -88,18 +89,20 @@ public class Receiver {
 				//check if packet was received and send ack
 				byte[] check = new byte[1028];
 				DatagramPacket checkPacket = new DatagramPacket(check,check.length);
-				checkPacket=buffer.peek(i);
+				datagramSocketR.receive(buffer.peek(i));
+				
+				
 						
-				int v = bytesToInt(check);
+				int v = bytesToInt(copyOfRange(check, 0, 4));
 				System.out.println(v);
 
 					// Send ack for all datagrams that are valid
 					if(v!=-1) {
 					// Recover seqNum from datagram and send ack
-					byte[] ackNumBytes = copyOfRange(data, 0, 4);
+					byte[] ackNumBytes = copyOfRange(check, 0, 4);
 					DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length, host, targetPort);
 					datagramSocketS.send(ackPacket);
-					System.out.println("Receiver: Sent Acknowledgement" + ByteBuffer.wrap(copyOfRange(data, 0, 4)).getInt());
+					System.out.println("Receiver: Sent Acknowledgement" + ByteBuffer.wrap(copyOfRange(check, 0, 4)).getInt());
 					
 					}
 					
@@ -111,12 +114,13 @@ public class Receiver {
 				int v = bytesToInt(check);
 				
 				while (!(buffer.isEmpty()) && v!=-1) {
-						buffer.dequeue();
-						fis.write(check);
 						byte[] checkn = new byte[1028];
 						DatagramPacket checkPacketn = new DatagramPacket(check,check.length);
 						checkPacket=buffer.peekHead();
 						v = bytesToInt(checkn);
+						buffer.dequeue();
+						fis.write(checkn);
+
 				}
 					
 			
