@@ -6,10 +6,10 @@ import java.net.DatagramPacket;
 
 public class CircularQueue {
 
-	 int maxSize;
-	 int head = 0;
-	 int tail = 0;
-	 DatagramPacket ringBuffer[];
+	int maxSize;
+	int head = -1;
+	int tail = -1;
+	DatagramPacket ringBuffer[];
 	// need to change abstract type later
 
 	public CircularQueue(int bufferSize) {
@@ -26,22 +26,22 @@ public class CircularQueue {
 	}
 
 	public boolean isEmpty() {
-		if (tail == head) {
+		if (tail == head && tail == -1) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public void enqueue( DatagramPacket data) {
+	public void enqueue(DatagramPacket data) { // should be datagram
 		if (this.isFull() == true) {
 			// throw overflow error
 			System.out.println("Queue is full, cannot enqueue.");
-		}
-		else if(this.isEmpty()) {
-			ringBuffer[head]=data;
-		}		
-		else {
+		} else {
+
+			if (tail == head && head == -1) {
+				head += 1;
+			}
 			tail = (tail + 1) % maxSize;
 			ringBuffer[tail] = data;
 			System.out.println(data + "is enqueued.");
@@ -55,34 +55,43 @@ public class CircularQueue {
 			return null;
 		} else {
 			DatagramPacket data = ringBuffer[head];
+			if (tail == head){
+				tail = -1;
+				head = -1;
+			} else {
 			head = (head + 1) % maxSize;
+			}
 			System.out.println(data + "is dequeued.");
 			return data;
 		}
 	}
-	
-	public DatagramPacket peekHead(){
+
+	public DatagramPacket peekHead() {
+		if(this.isEmpty()) {
+			System.out.println("Empty");
+			return null;
+		}
+		else {
 		DatagramPacket data = ringBuffer[head];
 		return data;
+		}
 	}
-	
-	//Should peek at element at a particular index
+
 	public DatagramPacket peek(int index) {
-       DatagramPacket data=ringBuffer[index];
-        
-        return data;
+	       DatagramPacket data=ringBuffer[index];
+	        
+	        return data;
+		}
+
+	void print() {
+		for (int i = head; i < tail; i++) {
+			System.out.print(ringBuffer[i] + " ");
+		}
+		System.out.println();
 	}
-	
-	void print()
-    {
-        for(int i=head;i<=tail;i++)
-        {
-         System.out.print(ringBuffer[i]+" ");  
-        }
-         System.out.println();  
-    }
 
 	// use main function to test
 
 }
+
 
