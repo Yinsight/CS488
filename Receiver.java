@@ -47,7 +47,7 @@ public class Receiver {
 			
 			//boolean running = true;
 			
-			while(buffer.isEmpty()) {
+			while(!buffer.isFull()) {
 				System.out.println("Enter While loop");
 				try {
 					DatagramPacket receivePacket = new DatagramPacket(data, data.length);	// incoming packet
@@ -69,7 +69,7 @@ public class Receiver {
 						buffer.enqueue(dummyPacket);
 					}
 					expected++;
-					
+					buffer.print();
 					//add to buffer (Circular Queue)
 					
 										
@@ -78,7 +78,7 @@ public class Receiver {
 					break;
 				}
 				
-				buffer.print();
+				
 			
 			}	
 			
@@ -99,7 +99,7 @@ public class Receiver {
 					byte[] ackNumBytes = copyOfRange(data, 0, 4);
 					DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length, host, targetPort);
 					datagramSocketS.send(ackPacket);
-					System.out.println("Receiver: Sent Acknowledgement" + v);
+					System.out.println("Receiver: Sent Acknowledgement" + ByteBuffer.wrap(copyOfRange(data, 0, 4)).getInt());
 					
 					}
 					
