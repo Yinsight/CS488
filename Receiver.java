@@ -31,7 +31,7 @@ public class Receiver {
 			FileOutputStream fis = new FileOutputStream(file);
 			byte[] data = new byte[1028]; //size of seq + file data
 			byte[] fileData = new byte[1024]; //size of file data
-			DatagramSocket datagramSocketL = new DatagramSocket(targetPort);    //to receive datagrams
+			DatagramSocket datagramSocketL = new DatagramSocket(ownPort);    //to receive datagrams
 			DatagramSocket datagramSocketS = new DatagramSocket();				 // to send ack
 			datagramSocketL.setSoTimeout(30000);
 			System.out.println("Receiver: Listening");
@@ -55,10 +55,12 @@ public class Receiver {
 			
 					//break down of data - get sequence number				
 					//needs to match how sender manages the sequence Number
-					seqNum= ByteBuffer.wrap(copyOfRange(data, data.length-4, data.length)).getInt();
+					System.out.println("Sequence number to be generated");
+					seqNum= ByteBuffer.wrap(copyOfRange(data, 0, 4)).getInt();
 					System.out.println("Receiver: Received sequence number: " + seqNum);
 					
 					if(expected==seqNum) {
+						System.out.println("Yes");
 						buffer.enqueue(receivePacket);		// make changes to circular queue
 					}
 					else {
@@ -75,6 +77,8 @@ public class Receiver {
 				catch (SocketTimeoutException e) {
 					break;
 				}
+				
+				buffer.print();
 			
 			}	
 			
@@ -92,7 +96,7 @@ public class Receiver {
 					// Send ack for all datagrams that are valid
 					if(v!=-1) {
 					// Recover seqNum from datagram and send ack
-					byte[] ackNumBytes = copyOfRange(data, data.length-4, data.length);
+					byte[] ackNumBytes = copyOfRange(data, 0, 4);
 					DatagramPacket ackPacket = new DatagramPacket(ackNumBytes, ackNumBytes.length, host, targetPort);
 					datagramSocketS.send(ackPacket);
 					System.out.println("Receiver: Sent Acknowledgement" + v);
@@ -141,5 +145,3 @@ public class Receiver {
 		return seqArr;
 	}
 }
-
-	
