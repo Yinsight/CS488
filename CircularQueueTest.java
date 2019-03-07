@@ -57,6 +57,15 @@ public class CircularQueueTest {
 		int data = ringBuffer[head];
 		return data;
 	}
+	
+	void print()
+    {
+        for(int i=0;i<3;i++)
+        {
+         System.out.print(ringBuffer[i]+" ");  
+        }
+         System.out.println();  
+    }
 
 	public static void main(String args[]) {
 
@@ -66,6 +75,6 @@ public class CircularQueueTest {
 		buffer.enqueue(2);
 		buffer.enqueue(3);
 
-		System.out.println(buffer);
+		buffer.print();
 	}
 }
