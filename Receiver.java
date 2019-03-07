@@ -29,7 +29,7 @@ public class Receiver {
 		
 			File file = new File("./Resource/copy_1_udp.jpg");
 			FileOutputStream fis = new FileOutputStream(file);
-			byte[] data = new byte[1028]; //size of seq + file data
+			
 			byte[] fileData = new byte[1024]; //size of file data
 			DatagramSocket datagramSocketL = new DatagramSocket(ownPort);    //to receive datagrams
 			DatagramSocket datagramSocketS = new DatagramSocket();				 // to send ack
@@ -51,6 +51,7 @@ public class Receiver {
 			while(!buffer.isFull()) {
 				System.out.println("Enter While loop");
 				try {
+					byte[] data = new byte[1028]; //size of seq + file data
 					DatagramPacket receivePacket = new DatagramPacket(data, data.length);	// incoming packet
 					datagramSocketL.receive(receivePacket);			//get data
 			
@@ -114,10 +115,11 @@ public class Receiver {
 				while (!(buffer.isEmpty()) && v!=-1) {
 						checkn =(byte[])buffer.dequeue();
 						fis.write(checkn);
+						if(!buffer.isEmpty()) {
 						checkn=(byte[])buffer.peekHead();
 						v = bytesToInt(checkn);
 						
-
+						}
 				} 
 					
 			
