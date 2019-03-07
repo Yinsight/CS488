@@ -20,7 +20,7 @@ public class Sender {
 	final static int targetPort = 8888;
 	static InetAddress host = null;
 	static HashSet<Integer> hashTable = new HashSet<>();
-	static HashSet<Integer> hashTable = new HashSet<>();
+	static ArrayList<DatagramPacket> packets = new ArrayList<>(); 
 	static DatagramSocket datagramSocket = null;
 	static {
 		try {
@@ -47,7 +47,6 @@ public class Sender {
 		File file = new File("./Resource/1.jpg");
 		RandomAccessFile fis = new RandomAccessFile(file, "r");
 		byte[] data = new byte[1024];
-		ArrayList<DatagramPacket> packets = new ArrayList<>();
 
 		int index = 0;
 		datagramSocket = new DatagramSocket();
@@ -84,9 +83,12 @@ public class Sender {
 	}
 }
 
-	public static boolean allPacketsInHashTable(CircularQueue buffer, HashSet<Integer> hashTable) {
-		for (Integer integer : window) {
-			if (!hashTable.contains(integer)) {
+public static boolean allPacketsInHashTable(CircularQueue<?> buffer, HashSet<Integer> hashTable) {
+		for (DatagramPacket packet : packets) {
+			if (hashTable.contains(packets)) {
+				buffer.dequeue(); //ack received and verified 
+			}
+			else {
 				return false;
 			}
 		}
