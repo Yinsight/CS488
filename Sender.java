@@ -20,6 +20,7 @@ public class Sender {
 	final static int targetPort = 8888;
 	static InetAddress host = null;
 	static HashSet<Integer> hashTable = new HashSet<>();
+	static HashSet<Integer> hashTable = new HashSet<>();
 	static DatagramSocket datagramSocket = null;
 	static {
 		try {
@@ -47,7 +48,6 @@ public class Sender {
 		RandomAccessFile fis = new RandomAccessFile(file, "r");
 		byte[] data = new byte[1024];
 		ArrayList<DatagramPacket> packets = new ArrayList<>();
-		int WINDOW_SIZE = 3;
 
 		int index = 0;
 		datagramSocket = new DatagramSocket();
@@ -55,68 +55,34 @@ public class Sender {
 
 		int ack = 0;
 		while (fis.read(data) != -1) {
-			if (window.size() < WINDOW_SIZE) {
-				index++; // track packet being sent'
+			while (!buffer.isFull()) {
 				ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-				DataOutputStream out = new DataOutputStream(byteArray); // used
-																		// to
-																		// put
-																		// data
-																		// into
-																		// a
-																		// byte
-																		// array
-				out.writeInt(index);
-				out.write(data);
+				DataOutputStream out = new DataOutputStream(byteArray); // used to put data into a byte array
 				byte[] finalData = byteArray.toByteArray();
 				DatagramPacket packet = new DatagramPacket(byteArray.toByteArray(), finalData.length, host, targetPort);
 				buffer.enqueue(packet);
 				packets.add(packet);
 				sendPacket(packet);
+				index++;
 				System.out.println("Sent packet: " + index);
-			} else {
-				// Once window is full, wait for receiver to send
-				// acknowledgement for next packet
-				// Check if all the packets in window have been received
-				if (allPacketsInHashTable(buffer, hashTable)) {
-					buffer.dequeue();
-					packets.clear();
-					continue;
-				}
-
-				fis.seek(index * 1024); // Keep file reader at current position
-
-				try {
-					byte[] response = new byte[4];
-					DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
-					datagramSocket.setSoTimeout(10000);
-					datagramSocket.receive(resPacket);
-					ack = bytesToInt(response);
-					hashTable.add(ack);
-					System.out.println("Received ack: " + ack);
-				} catch (SocketTimeoutException e) {
-					System.out.println("Resending packets");
-					for (int i = 0; i < window.size(); i++) {
-						if (!hashTable.contains(window.get(i))) {
-							// Resend missing packets
-							sendPacket(packets.get(i));
-							System.out.println("Resent packet: " + buffer.peek(i));
+			} 	System.out.println("Resent packet: " + buffer.peek(i));
 						}
-					}
-				}
 
+			while(true) {
+					datagramSocket.setSoTimeout(30000);
+					try {
+						byte[] response = new byte[4];
+						DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
+						datagramSocket.receive(resPacket);	//receiving ACK packet
+						ack = bytesToInt(response);
+						hashTable.add(ack);
+						System.out.println("Received ack: " + ack);
+				} catch (SocketTimeoutException e) {
+					break;
+				};
 			}
-
-			int i = 0;
-			while (i < buffer.maxSize && isAcked((byte[]) buffer.peek(i))) {
-				buffer.dequeue();
-				i++;
-			}
-		} // while part of the do-while loop
-
-		byte[] end = intToBytes(-1);
-		datagramSocket.send(new DatagramPacket(end, end.length, host, targetPort));
 	}
+}
 
 	public static boolean allPacketsInHashTable(CircularQueue buffer, HashSet<Integer> hashTable) {
 		for (Integer integer : window) {
