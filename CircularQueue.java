@@ -1,6 +1,5 @@
 package lab1.cs488.pace.edu;
 
-
 public class CircularQueue<T> {
 
 	int maxSize;
@@ -52,11 +51,11 @@ public class CircularQueue<T> {
 			return null;
 		} else {
 			Object data = ringBuffer[head];
-			if (tail == head){
+			if (tail == head) {
 				tail = -1;
 				head = -1;
 			} else {
-			head = (head + 1) % maxSize;
+				head = (head + 1) % maxSize;
 			}
 			System.out.println(data + "is dequeued.");
 			return data;
@@ -64,21 +63,20 @@ public class CircularQueue<T> {
 	}
 
 	public Object peekHead() {
-		if(this.isEmpty()) {
+		if (this.isEmpty()) {
 			System.out.println("Empty");
 			return null;
-		}
-		else {
-		Object data = ringBuffer[head];
-		return data;
+		} else {
+			Object data = ringBuffer[head];
+			return data;
 		}
 	}
 
 	public Object peek(int index) {
-	       Object data=ringBuffer[index];
-	        
-	        return data;
-		}
+		Object data = ringBuffer[index];
+
+		return data;
+	}
 
 	void print() {
 		for (int i = head; i < tail; i++) {
@@ -87,9 +85,4 @@ public class CircularQueue<T> {
 		System.out.println();
 	}
 
-	// use main function to test
-
 }
-
-
-
