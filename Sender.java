@@ -53,17 +53,12 @@ public class Sender {
 		System.out.println("Sender: connection built, about to transfer.");
 
 		int ack = 0;
+		
+		do{
 		while (fis.read(data) != -1) {
 			while (!buffer.isFull()) {
 				ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-				DataOutputStream out = new DataOutputStream(byteArray); // used
-																		// to
-																		// put
-																		// data
-																		// into
-																		// a
-																		// byte
-																		// array
+				DataOutputStream out = new DataOutputStream(byteArray); 													// array
 				byte[] finalData = byteArray.toByteArray();
 				DatagramPacket packet = new DatagramPacket(byteArray.toByteArray(), finalData.length, host, targetPort);
 				buffer.enqueue(packet);
@@ -97,6 +92,8 @@ public class Sender {
 		}
 
 	}
+	while (file != null && !hashTable.isEmpty());
+}
 
 	public static boolean allPacketsInHashTable(CircularQueue<?> buffer, HashSet<Integer> hashTable) {
 		for (DatagramPacket packet : packets) {
