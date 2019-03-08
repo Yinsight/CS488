@@ -72,22 +72,30 @@ public class Sender {
 				index++;
 				System.out.println("Sent packet: " + index);
 			}
+
+			while (true) {
+				datagramSocket.setSoTimeout(30000);
+				try {
+					byte[] response = new byte[4];
+					DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
+					datagramSocket.receive(resPacket); // receiving ACK packet
+					ack = bytesToInt(response);
+					hashTable.add(ack);
+					System.out.println("Received ack: " + ack);
+				} catch (SocketTimeoutException e) {
+					break;
+				}
+				;
+			}
+
+			int i = 0;
+			while (i < buffer.maxSize && isAcked((byte[]) buffer.peek(i))) {
+				buffer.dequeue();
+				i++;
+			}
+
 		}
 
-		while (true) {
-			datagramSocket.setSoTimeout(30000);
-			try {
-				byte[] response = new byte[4];
-				DatagramPacket resPacket = new DatagramPacket(response, response.length, host, targetPort);
-				datagramSocket.receive(resPacket); // receiving ACK packet
-				ack = bytesToInt(response);
-				hashTable.add(ack);
-				System.out.println("Received ack: " + ack);
-			} catch (SocketTimeoutException e) {
-				break;
-			}
-			;
-		}
 	}
 
 	public static boolean allPacketsInHashTable(CircularQueue<?> buffer, HashSet<Integer> hashTable) {
