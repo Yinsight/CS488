@@ -48,7 +48,7 @@ public class Sender {
 		RandomAccessFile fis = new RandomAccessFile(file, "r");
 		byte[] data = new byte[1024];
 
-		int index = 1;
+		int index = 0;
 		datagramSocket = new DatagramSocket();
 		System.out.println("Sender: connection built, about to transfer.");
 
@@ -60,7 +60,6 @@ public class Sender {
 					ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
 					DataOutputStream out = new DataOutputStream(byteArray); // array
 					byte[] finalData = byteArray.toByteArray();
-					out.write(data);
 					DatagramPacket packet = new DatagramPacket(byteArray.toByteArray(), finalData.length, host,
 							targetPort);
 					buffer.enqueue(packet);
@@ -87,8 +86,9 @@ public class Sender {
 				}
 
 				int i = 0;
-				//while (i < buffer.maxSize && isAcked((byte[]) buffer.peek(i))) {
-				while (i < buffer.maxSize && hashTable.contains(i)) {
+				// while (i < buffer.maxSize && isAcked((byte[])
+				// buffer.peek(i))) {
+				while (i < buffer.maxSize && hashTable.contains(ack)) {
 					buffer.dequeue();
 					i++;
 				}
