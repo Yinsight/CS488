@@ -40,7 +40,7 @@ public class Iperfer {
         String host = cmd.getFlagValue("-h");
         int timeinsec = getInt(cmd.getFlagValue("-t"));
         
-        throughPut(cmd.getFlagValue("host"), Integer.parseInt(cmd.getFlagValue("port")));
+        throughPut(host,port));
     }
 
     private static int getInt(String portString) {
