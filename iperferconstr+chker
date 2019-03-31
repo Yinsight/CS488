@@ -1,9 +1,20 @@
 import java.util.*;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 //CommandLine reference:
 //https://commons.apache.org/proper/commons-cli/javadocs/api-1.3.1/org/apache/commons/cli/CommandLine.html
 
 public class Iperfer {
+
+static int currentTime;		// a counter that runs when program connects
+	static int maxTime=currentTime+20; // used to check while loop
+	static byte[] data = new byte[1000]; // data to be sent
+	static byte accumulator;			// keep track of how much data is sent 
+	static long elapsed_Time=0;			// starts once entered the while loop
+	static long throughput;				// accumulator / elapsed-Time
+	
 
     public static void main(String[] args) {
         CommandLine cmd = new CommandLine();
@@ -28,6 +39,8 @@ public class Iperfer {
 
         String host = cmd.getFlagValue("-h");
         int timeinsec = getInt(cmd.getFlagValue("-t"));
+        
+        throughPut(cmd.getFlagValue("host"), cmd.getFlagValue("port"));
     }
 
     private static int getInt(String portString) {
@@ -88,4 +101,19 @@ public class Iperfer {
             flagsWithValues.add(flagName);
         }
     }
+    
+    public static long throughPut(String ip, String port) throws IOException{
+		long start=0;
+		Socket socket = new Socket();
+		start = System.nanoTime(); 
+		while(elapsed_Time<maxTime){
+			socket.getOutputStream().write(data);
+			accumulator+=1000;
+			elapsed_Time = System.nanoTime() - start;
+		}
+		socket.close();
+		throughput = accumulator/elapsed_Time;
+		return throughput;
+	}
+	
 }
