@@ -6,17 +6,19 @@ import java.net.UnknownHostException;
 //CommandLine reference:
 //https://commons.apache.org/proper/commons-cli/javadocs/api-1.3.1/org/apache/commons/cli/CommandLine.html
 
-public class Iperfer {
+public class iperfer {
 
 	static long currentTime;		// a counter that runs when program connects
 	static long maxTime=currentTime+20; // used to check while loop
 	static byte[] data = new byte[1000]; // data to be sent
-	static byte accumulator;			// keep track of how much data is sent 
+	static long accumulator=0;			// keep track of how much data is sent 
+	static long accKB =0 ;
+	static long accMB =0 ;
 	static long elapsed_Time=0;			// starts once entered the while loop
 	static long throughput;				// accumulator / elapsed-Time
 	
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
         CommandLine cmd = new CommandLine();
         cmd.saveFlagValue("-h"); //host
         cmd.saveFlagValue("-p"); //port
@@ -40,7 +42,7 @@ public class Iperfer {
         String host = cmd.getFlagValue("-h");
         int timeinsec = getInt(cmd.getFlagValue("-t"));
         
-        System.out.println(throughPut(host,port));
+        throughPut(host,port);
     }
 
     private static int getInt(String portString) {
@@ -102,7 +104,7 @@ public class Iperfer {
         }
     }
     
-    public static long throughPut(String ip, int port) throws IOException{
+    public static void throughPut(String ip, int port) throws IOException{
 		long start=0;
 		Socket socket = new Socket(ip,port);
 	   	currentTime = System.nanoTime();
@@ -113,8 +115,10 @@ public class Iperfer {
 			elapsed_Time = System.nanoTime() - start;
 		}
 		socket.close();
-		throughput = accumulator/elapsed_Time;
-		return throughput;
+		accKB = accumulator /1000;
+		accMB = accKB / 1000;
+		throughput = accMB/ elapsed_Time;
+		System.out.println("Sent = "+ accKB + "KB rate = " + throughput + "Mbps");
 	}
 	
-}
+} 
