@@ -104,7 +104,7 @@ static int currentTime;		// a counter that runs when program connects
     
     public static long throughPut(String ip, String port) throws IOException{
 		long start=0;
-		Socket socket = new Socket();
+		Socket socket = new Socket(ip,port);
 		start = System.nanoTime(); 
 		while(elapsed_Time<maxTime){
 			socket.getOutputStream().write(data);
