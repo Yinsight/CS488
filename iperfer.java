@@ -16,7 +16,7 @@ public class Iperfer {
 	static long throughput;				// accumulator / elapsed-Time
 	
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
         CommandLine cmd = new CommandLine();
         cmd.saveFlagValue("-h"); //host
         cmd.saveFlagValue("-p"); //port
@@ -40,7 +40,7 @@ public class Iperfer {
         String host = cmd.getFlagValue("-h");
         int timeinsec = getInt(cmd.getFlagValue("-t"));
         
-        throughPut(host,port));
+        System.out.println(throughPut(host,port));
     }
 
     private static int getInt(String portString) {
