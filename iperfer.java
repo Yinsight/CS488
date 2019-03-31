@@ -8,8 +8,8 @@ import java.net.UnknownHostException;
 
 public class Iperfer {
 
-static int currentTime;		// a counter that runs when program connects
-	static int maxTime=currentTime+20; // used to check while loop
+	static long currentTime;		// a counter that runs when program connects
+	static long maxTime=currentTime+20; // used to check while loop
 	static byte[] data = new byte[1000]; // data to be sent
 	static byte accumulator;			// keep track of how much data is sent 
 	static long elapsed_Time=0;			// starts once entered the while loop
@@ -40,7 +40,7 @@ static int currentTime;		// a counter that runs when program connects
         String host = cmd.getFlagValue("-h");
         int timeinsec = getInt(cmd.getFlagValue("-t"));
         
-        throughPut(cmd.getFlagValue("host"), cmd.getFlagValue("port"));
+        throughPut(cmd.getFlagValue("host"), Integer.parseInt(cmd.getFlagValue("port")));
     }
 
     private static int getInt(String portString) {
@@ -102,9 +102,10 @@ static int currentTime;		// a counter that runs when program connects
         }
     }
     
-    public static long throughPut(String ip, String port) throws IOException{
+    public static long throughPut(String ip, int port) throws IOException{
 		long start=0;
 		Socket socket = new Socket(ip,port);
+	   	currentTime = System.nanoTime();
 		start = System.nanoTime(); 
 		while(elapsed_Time<maxTime){
 			socket.getOutputStream().write(data);
