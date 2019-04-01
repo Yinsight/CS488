@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 //CommandLine reference:
 //https://commons.apache.org/proper/commons-cli/javadocs/api-1.3.1/org/apache/commons/cli/CommandLine.html
 
-public class iperfer {
+public class iperf {
 
 	static long currentTime;		// a counter that runs when program connects
 	static long maxTime=currentTime+20; // used to check while loop
@@ -117,10 +117,10 @@ public class iperfer {
 		System.out.println(accumulator);
 		
 		socket.close();
-		accKB = accumulator/1000;
-		accMB = accKB/1000;
-		throughput = accMB/elapsed_Time;
-		System.out.println("Sent = "+ accKB + "KB rate = " + throughput + "Mbps");
+		accKB = (accumulator*8) /1000;
+		accMB = accKB / 1000;
+		throughput = accumulator/ elapsed_Time;
+		System.out.println("Sent = "+ accKB + "Kb rate = " + throughput + "Mbps");
 	}
 	
 } 
