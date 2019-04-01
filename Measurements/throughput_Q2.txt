@@ -1,2 +1,1 @@
 Sent = 57269Kb rate = 22Mbps
-
