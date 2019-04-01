@@ -117,9 +117,9 @@ public class iperfer {
 		System.out.println(accumulator);
 		
 		socket.close();
-		accKB = accumulator /1000;
-		accMB = accKB / 1000;
-		throughput = accMB/ elapsed_Time;
+		accKB = accumulator/1000;
+		accMB = accKB/1000;
+		throughput = accMB/elapsed_Time;
 		System.out.println("Sent = "+ accKB + "KB rate = " + throughput + "Mbps");
 	}
 	
