@@ -42,7 +42,7 @@ public class iperfer {
         String host = cmd.getFlagValue("-h");
         int timeinsec = getInt(cmd.getFlagValue("-t"));
         
-        throughPut(host,port);
+        throughPut(host,port, timeinsec);
     }
 
     private static int getInt(String portString) {
@@ -104,16 +104,18 @@ public class iperfer {
         }
     }
     
-    public static void throughPut(String ip, int port) throws IOException{
+    public static void throughPut(String ip, int port, int timeinsec) throws IOException{
 		long start=0;
 		Socket socket = new Socket(ip,port);
 	   	currentTime = System.nanoTime();
 		start = System.nanoTime(); 
-		while(elapsed_Time<maxTime){
+		while(elapsed_Time<timeinsec){
 			socket.getOutputStream().write(data);
 			accumulator+=1000;
 			elapsed_Time = System.nanoTime() - start;
 		}
+		System.out.println(accumulator);
+		
 		socket.close();
 		accKB = accumulator /1000;
 		accMB = accKB / 1000;
