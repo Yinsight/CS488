@@ -1,3 +1,1 @@
 Sent = 104317Kb rate = 41Mbps
-
-Received = 99.5 MBytes  rate = 37.6 Mbits/sec
