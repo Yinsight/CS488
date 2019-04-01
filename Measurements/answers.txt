@@ -2,7 +2,7 @@ Q2: Path Latency and Throughput
 
 The expected latency of the path between h1 and h4 should be the sum of all links in between: L1 + L2 + L3 = 81.462 + 21.056 + 61.165 = 163.683 ms
 
-The expected throughput of the path between h1 and h4 is the minimum throughput among the links in between, which is 24 Mbps.
+The expected throughput of the path between h1 and h4 should be close to the minimum throughput among the links in between, which is 24 Mbps.
 
 Average RTT:
 20 packets transmitted, 20 received, 0% packet loss, time 19022ms
@@ -31,10 +31,17 @@ h7-h9:
 20 packets transmitted, 20 received, 0% packet loss, time 19026ms           
 rtt min/avg/max/mdev = 161.106/162.496/167.240/1.387 ms
 
+The prediction is correct.
+
 Measured throughput for 2 pairs:
 h1-h4:
-
+Sent = 49192Kb rate = 19Mbps
 h7-h9:
+Sent = 13555Kb rate = 5Mbps
+
+Explanation: 
+Although each throughput is not equal to 12Mbps as predicted, they add up tp 24 Mbps, which is equal to the minimum throughput among the links in between.
+The prediction is a little off because the throughput is not always equally divided.
 
 
 Average RTT and measured throughput for 3 pairs:
@@ -48,25 +55,30 @@ h10-h8:
 20 packets transmitted, 20 received, 0% packet loss, time 19026ms
 rtt min/avg/max/mdev = 161.149/162.834/170.085/2.053 ms
 
+The prediction is correct.
+
 Measured throughput for 3 pairs:
 h1-h4:
-
+Sent = 23720Kb rate = 9Mbps
 h7-h9:
-
+Sent = 27167Kb rate = 10Mbps
 h10-h8:
+Sent = 13892Kb rate = 5Mbps
 
-
+Explanation: 
+Each throughput are close to 8Mbps as predicted, and they add up tp 24 Mbps, which is equal to the minimum throughput among the links in between.
+The prediction is a little off because the throughput is not always equally divided.
 
 ——————————————————————————————————————————————————————————————
 
 
 Q4: Effects of Multiplexing
 
-The expected latency of the path between h1 and h4 should be the sum of all links in between: L1 + L2 + L3 = 81.462 + 21.056 + 61.165 = 163.683 ms
-The expected latency of the path between h5 and h6 should be the sum of all links in between: L4 + L2 + L5 = 11.260 + 21.056 + 11.233 = 43.549
+The expected latency of the path between h1 and h4 should be close to the sum of all links in between: L1 + L2 + L3 = 81.462 + 21.056 + 61.165 = 163.683 ms
+The expected latency of the path between h5 and h6 should be close to the sum of all links in between: L4 + L2 + L5 = 11.260 + 21.056 + 11.233 = 43.549 ms
 
-The expected throughput of the path between h1 and h4 should be
-The expected throughput of the path between h1 and h4 should be
+The expected throughput of the path between h1 and h4 should be less than 24 Mbps, which is the minimum throughput of the links in between, since L2 is used by both communications.
+The expected throughput of the path between h5 and h6 should be less than 28 Mbps, which is the minimum throughput of the links in between, since L2 is used by both communications.
 
 Average RTT:
 h1-h4:
@@ -77,9 +89,14 @@ h5-h6:
 20 packets transmitted, 20 received, 0% packet loss, time 19028ms
 rtt min/avg/max/mdev = 41.393/42.665/48.811/1.772 ms
 
+The predictions are correct.
+
 Measured throughput:
+h1-h4:
+Sent = 44293Kb rate = 17Mbps
 
+h5-h6:
+Sent = 67454Kb rate = 26Mbps
 
-
-
+The predictions are correct. Both throughputs are less than the minimum throughput of the links in between. This is because L2 is shared by both communications.
 
