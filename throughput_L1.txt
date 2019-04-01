@@ -1,2 +1,2 @@
 Sent = 13303Kb rate = 5Mbps
-Received:12.7 MBytes  Rate: 4.51 Mbits/sec
+Received = 12.7 MBytes  Rate = 4.51 Mbits/sec
