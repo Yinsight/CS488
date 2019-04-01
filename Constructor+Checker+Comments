@@ -71,7 +71,7 @@ public class Iperfer {
         }
 
         //Function: takes an array of args and extract its contents
-        //Separating the flags from regular arments
+        //Separating the flags from regular arguments
         void parse(String[] args) {
             List<String> regularArgs = new ArrayList<>();
             for (int n = 0; n < args.length; ++n) {
