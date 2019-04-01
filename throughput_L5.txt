@@ -1,1 +1,1 @@
-Sent = 15296Kb rate = 6Mbps
+Sent = 73561Kb rate = 29Mbps
