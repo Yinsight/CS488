@@ -1,2 +1,2 @@
 Sent = 57269Kb rate = 22Mbps
-Received = 54.6 MBytes  rate = 17.9 Mbits/sec
+
