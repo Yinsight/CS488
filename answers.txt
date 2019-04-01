@@ -1,0 +1,37 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Q2: Path Latency and Throughput\
+\
+The expected latency of the path between h1 and h4: is the sum of all links in between: L1 + L2 + L3 = 81.462 + 21.056 + 61.165 = 163.683 ms\
+\
+The expected throughput of the path between h1 and h4 is the slowest among the links in between:\
+\
+Average RTT:\
+20 packets transmitted, 20 received, 0% packet loss, time 19022ms\
+rtt min/avg/max/mdev = 161.230/162.367/163.918/0.797 ms\
+\
+The prediction is correct.\
+\
+Measured throughput:\
+\
+\
+Q3: Effects of Multiplexing\
+\
+Expected Latency and throughput of 2 pairs:\
+Expected Latency and throughput of 3 pairs:\
+\
+Average RTT and measured throughput for 2 pairs:\
+Average RTT and measured throughput for 4 pairs:\
+\
+\
+Q4: Effects of Multiplexing\
+\
+Expected Latency and throughput:\
+\
+Average RTT and measured throughput:\
+}
