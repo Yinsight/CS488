@@ -63,6 +63,10 @@ public class Receiver {
 
                     if (expected == seqNum) {
                         System.out.println("Yes");
+                        int drop = random.nextInt(5); //Packet drop simulation: drop packet when random number is 3
+                        if(drop == 3) {
+                            System.out.println("Dropping packet " + seqNum); 
+                        } else {                     
                         buffer.enqueue(data);        // make changes to circular queue
                         expected++;
                     }
@@ -77,8 +81,6 @@ public class Receiver {
                 } catch (SocketTimeoutException e) {
                     break;
                 }
-
-
 
             }
 
