@@ -3,6 +3,7 @@ package lab1.cs488.pace.edu;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 public class Receiver {
 
@@ -19,6 +20,7 @@ public class Receiver {
 
         File file = new File("./Resource/copy_1_udp.jpg");
         FileOutputStream fis = new FileOutputStream(file);
+        Random random = new Random();
 
         byte[] fileData = new byte[1024]; //size of file data
         DatagramSocket datagramSocketL = new DatagramSocket(ownPort);    //to receive datagrams
