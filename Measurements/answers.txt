@@ -77,8 +77,10 @@ Q4: Effects of Multiplexing
 The expected latency of the path between h1 and h4 should be close to the sum of all links in between: L1 + L2 + L3 = 81.462 + 21.056 + 61.165 = 163.683 ms
 The expected latency of the path between h5 and h6 should be close to the sum of all links in between: L4 + L2 + L5 = 11.260 + 21.056 + 11.233 = 43.549 ms
 
-The expected throughput of the path between h1 and h4 should be less than 24 Mbps, which is the minimum throughput of the links in between, since L2 is used by both communications.
-The expected throughput of the path between h5 and h6 should be less than 28 Mbps, which is the minimum throughput of the links in between, since L2 is used by both communications.
+The expected throughput of the path between h1 and h4 should be less than 24 Mbps, which is the minimum throughput of the links in between; The expected throughput of the path between h5 and h6 should be less than 28 Mbps, which is the minimum throughput of the links in between.
+However, 24 + 28 = 52 Mbps, which is larger than the throughput of L2, which is 41 Mbps. So the two paths will divide and share 41 Mbps.
+My prediction is that the path between h1 and h4 will have (24/52)*41 = 19 Mbps, while the path between h5 and h6 will have (28/52)*41 = 22 Mbps.
+I made this prediction because since the path between h5 and h6 has larger throughput, it will always have an advantage when sharing the 41 Mbps.
 
 Average RTT:
 h1-h4:
@@ -89,8 +91,6 @@ h5-h6:
 20 packets transmitted, 20 received, 0% packet loss, time 19028ms
 rtt min/avg/max/mdev = 41.393/42.665/48.811/1.772 ms
 
-The predictions are correct.
-
 Measured throughput:
 h1-h4:
 Sent = 44293Kb rate = 17Mbps
@@ -98,5 +98,5 @@ Sent = 44293Kb rate = 17Mbps
 h5-h6:
 Sent = 67454Kb rate = 26Mbps
 
-The predictions are correct. Both throughputs are less than the minimum throughput of the links in between. This is because L2 is shared by both communications.
+The predictions are correct.
 
