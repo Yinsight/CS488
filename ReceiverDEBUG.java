@@ -65,8 +65,8 @@ public class Receiver {
 
                     if (expected == seqNum) {
                         System.out.println("Yes");
-                        int drop = random.nextInt(5); //Packet drop simulation: drop packet when random number is 3
-                        if(drop == 3) {
+                        int drop = random.nextInt(9); //Packet drop simulation: drop packet when random number is less than 2 (20% drop rate)
+                        if(drop < 2) {
                             System.out.println("Dropping packet " + seqNum); 
                         } else {                     
                         buffer.enqueue(data);        // make changes to circular queue
