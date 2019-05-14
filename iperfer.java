@@ -1,6 +1,11 @@
 import java.util.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 //CommandLine reference:
@@ -30,18 +35,18 @@ public class iperfer {
 			} else {
 				return true;
 			}
-		}else{
+		} else {
 			throw new IllegalArgumentException("Error: missing arguments");
 		}
 	}
-	
-	public static CommandLine checkargsforClient(String[] args){
-		
+
+	public static CommandLine checkargsforClient(String[] args) {
+
 		CommandLine cmd = new CommandLine();
 		cmd.saveFlagValue("-h"); // host
 		cmd.saveFlagValue("-p"); // port
 		cmd.saveFlagValue("-t"); // time
-		
+
 		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-t") || cmd.numberOfFlags() > 4) {
 			throw new IllegalArgumentException("Error: missing or additional arguments");
 		}
@@ -73,18 +78,18 @@ public class iperfer {
 	}
 
 	public static void main(String[] args) throws IOException {
-		
+
 		CommandLine cmd;
-		
-		if (checkargs(args) == false){
-			
+
+		if (checkargs(args) == false) {
+
 			cmd = checkargsforClient(args);
 			String host = cmd.getFlagValue("-h");
 			int timeinsec = getInt(cmd.getFlagValue("-t"));
 			int port = getInt(cmd.getFlagValue("-p"));
 			throughPutClient(host, port, timeinsec);
-			
-		}else{
+
+		} else {
 			checkargsforServer(args);
 			cmd = checkargsforServer(args);
 			int port = getInt(cmd.getFlagValue("-p"));
@@ -162,25 +167,44 @@ public class iperfer {
 
 	public static void throughPutClient(String ip, int port, int timeinsec) throws IOException {
 		long start = 0;
-		Socket socket = new Socket(ip, port);
+		Socket clientsocket = new Socket(ip, port);
 		currentTime = System.nanoTime();
 		start = System.nanoTime();
 		while ((elapsed_Time / 1000000000) < timeinsec) {
-			socket.getOutputStream().write(data);
+			clientsocket.getOutputStream().write(data);
 			accumulator += 1000;
 			elapsed_Time = System.nanoTime() - start;
 		}
 		// System.out.println(accumulator);
 
-		socket.close();
+		clientsocket.close();
 		accKB = accumulator / 1000;
 		accMB = (accKB * 8) / 1000;
 		throughput = accMB / timeinsec;
 		System.out.println("Sent = " + accKB + "Kb rate = " + throughput + "Mbps");
 	}
 
-	public static void throughPutServer(int port) {
-		
+	public static void throughPutServer(int port) throws IOException {
+		long start = 0;
+		InetAddress host = InetAddress.getByName("localhost");
+		ServerSocket serversocket = new ServerSocket(port, 1, host);
+		currentTime = System.nanoTime();
+		serversocket.setSoTimeout(1000); //milliseconds
+		while (true) {
+			Socket clientsocket = serversocket.accept();
+			start = System.nanoTime();
+			try {
+				while (clientsocket.getInputStream().read(data) != -1) {
+					accumulator += 1000;
+					elapsed_Time = System.nanoTime() - start;
+				}
+			} catch (SocketTimeoutException e) {
+				accKB = accumulator / 1000;
+				accMB = (accKB * 8) / 1000;
+				throughput = accMB / (elapsed_Time/(10^9) - 1);  //elapsed time minus timeout (1 second)
+				System.out.println("Received = " + accKB + "Kb rate = " + throughput + "Mbps");
+			}
+		}
 
 	}
 
