@@ -23,6 +23,8 @@ public class pinger {
 	static long accMB = 0;
 	static long elapsed_Time = 0; // starts once entered the while loop
 	private static final int AVERAGE_DELAY = 100; // milliseconds
+	static DatagramSocket datagramSocket = null;
+	static long latency; // latency = elapsed-Time - timeout
 
 	public static boolean checkargs(String[] args) {
 
@@ -47,7 +49,7 @@ public class pinger {
 		CommandLine cmd = new CommandLine();
 		cmd.saveFlagValue("-h"); // host
 		cmd.saveFlagValue("-p"); // port
-		cmd.saveFlagValue("-t"); // time
+		cmd.saveFlagValue("-n"); // number of packets
 
 		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-n") || cmd.numberOfFlags() > 4) {
 			throw new IllegalArgumentException("Error: missing or additional arguments");
@@ -87,9 +89,9 @@ public class pinger {
 
 			cmd = checkargsforClient(args);
 			String host = cmd.getFlagValue("-h");
-			int timeinsec = getInt(cmd.getFlagValue("-t"));
 			int port = getInt(cmd.getFlagValue("-p"));
-			latencyClient(host, port, timeinsec);
+			int nofpackets = getInt(cmd.getFlagValue("-n"));
+			latencyClient(host, port, nofpackets);
 
 		} else {
 			checkargsforServer(args);
@@ -168,8 +170,35 @@ public class pinger {
 		}
 	}
 
-	public static void latencyClient(String ip, int port, int timeinsec) throws IOException {
-
+	public static void latencyClient(String host, int port, int nofpackets) throws IOException {
+		
+		DatagramSocket clientsocket = new DatagramSocket();
+		
+		int nofpacketlost = 0;
+		int sum = 0;
+		int max = 0;
+		int min = 1;
+		
+		long start = 0;
+		
+		for (int i = 0; i < nofpackets; i++) {
+			  
+			start = System.nanoTime();
+			//clientsocket.send();
+			try{
+				byte[] response = new byte[4];
+				//DatagramPacket resPacket = new DatagramPacket(response, response.length, host, port);
+				clientsocket.setSoTimeout(1000);
+				clientsocket.receive(null);  //replace null with resPacket
+				elapsed_Time = System.nanoTime() - start;
+				latency = elapsed_Time-1;
+			}catch(SocketTimeoutException e){
+				System.out.println("packet " + i + " timed out.");
+				nofpacketlost++;
+			}
+			
+			}
+		clientsocket.close();
 	}
 
 	public static void latencyServer(int port) throws IOException {
@@ -178,7 +207,7 @@ public class pinger {
 
 		// Create a datagram socket for receiving and sending UDP packets
 		// through the port specified on the command line.
-		DatagramSocket socket = new DatagramSocket(port);
+		DatagramSocket serversocket = new DatagramSocket(port);
 
 		// Processing loop.
 		while (true) {
@@ -186,7 +215,7 @@ public class pinger {
 			DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
 
 			// Block until the host receives a UDP packet.
-			socket.receive(request);
+			serversocket.receive(request);
 
 			// Decide whether to reply, or simulate packet loss.
 			if (random.nextInt(10) < 3) {
@@ -195,7 +224,7 @@ public class pinger {
 				byte[] buffer = request.getData().toString().toUpperCase().getBytes();
 
 				DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
-				socket.send(reply);
+				serversocket.send(reply);
 				continue;
 			}
 
@@ -212,7 +241,7 @@ public class pinger {
 			int clientPort = request.getPort();
 			byte[] buffer = request.getData();
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
-			socket.send(reply);
+			serversocket.send(reply);
 		}
 
 	}
