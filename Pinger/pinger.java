@@ -1,4 +1,4 @@
-import java.util.*;
+ import java.util.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -84,6 +84,7 @@ public class pinger {
 	public static void main(String[] args) throws IOException {
 
 		CommandLine cmd;
+		
 
 		if (checkargs(args) == false) {
 
@@ -170,28 +171,51 @@ public class pinger {
 		}
 	}
 
-	public static void latencyClient(String host, int port, int nofpackets) throws IOException {
+	public static void latencyClient(String h, int port, int nofpackets) throws IOException {
 		
-		DatagramSocket clientsocket = new DatagramSocket();
+		InetAddress host = null;
+		host = InetAddress.getByName(h);
+		
+		DatagramSocket clientsocket = new DatagramSocket(port);
 		
 		int nofpacketlost = 0;
+		int count=0;
 		int sum = 0;
-		int max = 0;
-		int min = 1;
+		long max = 0;
+		long min = 1;
 		
 		long start = 0;
 		
 		for (int i = 0; i < nofpackets; i++) {
-			  
+			// create string to send 
+			String str = "PING";
+			byte[] buff = new byte[1024];
+			buff=str.getBytes();
+			// Create Datagram packet to send as UDP Packet
+			// check if initialized correctly (port removed) 
+			DatagramPacket ping = new DatagramPacket(buff, buff.length, host, port);
+			// start time (nanoseconds)
 			start = System.nanoTime();
-			//clientsocket.send();
+			
+			// send ping to specified server 
+			clientsocket.send(ping);
+			
 			try{
-				byte[] response = new byte[4];
-				//DatagramPacket resPacket = new DatagramPacket(response, response.length, host, port);
+				
+				DatagramPacket resPacket = new DatagramPacket(new byte[1024], 1024);
 				clientsocket.setSoTimeout(1000);
-				clientsocket.receive(null);  //replace null with resPacket
+				clientsocket.receive(resPacket);  //replace null with resPacket
 				elapsed_Time = System.nanoTime() - start;
-				latency = elapsed_Time-1;
+				latency = (elapsed_Time/1000000000);
+				if(min>latency){
+					min=latency;
+				}
+				if(max<latency){
+					max=latency;
+				}
+				sum+=latency;
+				count++;
+				
 			}catch(SocketTimeoutException e){
 				System.out.println("packet " + i + " timed out.");
 				nofpacketlost++;
@@ -199,6 +223,10 @@ public class pinger {
 			
 			}
 		clientsocket.close();
+		System.out.println("Min Latency "+ min);
+		System.out.println("Max Latency "+ max);
+		System.out.println("Average Latency "+ sum/count);
+		System.out.println("No. of packets lost "+ nofpacketlost);
 	}
 
 	public static void latencyServer(int port) throws IOException {
@@ -248,4 +276,4 @@ public class pinger {
 
 	}
 
-}
+} 
