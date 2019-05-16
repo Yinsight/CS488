@@ -2,6 +2,8 @@ import java.util.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +22,7 @@ public class pinger {
 	static long accKB = 0;
 	static long accMB = 0;
 	static long elapsed_Time = 0; // starts once entered the while loop
-	static long throughput; // accumulator / elapsed-Time
+	private static final int AVERAGE_DELAY = 100; // milliseconds
 
 	public static boolean checkargs(String[] args) {
 
@@ -47,7 +49,7 @@ public class pinger {
 		cmd.saveFlagValue("-p"); // port
 		cmd.saveFlagValue("-t"); // time
 
-		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-t") || cmd.numberOfFlags() > 4) {
+		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-n") || cmd.numberOfFlags() > 4) {
 			throw new IllegalArgumentException("Error: missing or additional arguments");
 		}
 
@@ -87,13 +89,14 @@ public class pinger {
 			String host = cmd.getFlagValue("-h");
 			int timeinsec = getInt(cmd.getFlagValue("-t"));
 			int port = getInt(cmd.getFlagValue("-p"));
-			
+			latencyClient(host, port, timeinsec);
 
 		} else {
 			checkargsforServer(args);
 			cmd = checkargsforServer(args);
 			int port = getInt(cmd.getFlagValue("-p"));
-			
+			latencyServer(port);
+
 		}
 	}
 
@@ -165,5 +168,53 @@ public class pinger {
 		}
 	}
 
+	public static void latencyClient(String ip, int port, int timeinsec) throws IOException {
+
+	}
+
+	public static void latencyServer(int port) throws IOException {
+
+		Random random = new Random();
+
+		// Create a datagram socket for receiving and sending UDP packets
+		// through the port specified on the command line.
+		DatagramSocket socket = new DatagramSocket(port);
+
+		// Processing loop.
+		while (true) {
+			// Create a datagram packet to hold incoming UDP packet.
+			DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
+
+			// Block until the host receives a UDP packet.
+			socket.receive(request);
+
+			// Decide whether to reply, or simulate packet loss.
+			if (random.nextInt(10) < 3) {
+				InetAddress clientHost = request.getAddress();
+				int clientPort = request.getPort();
+				byte[] buffer = request.getData().toString().toUpperCase().getBytes();
+
+				DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
+				socket.send(reply);
+				continue;
+			}
+
+			// Simulate network delay.
+			try {
+				Thread.sleep((int) (random.nextDouble() * 2 * AVERAGE_DELAY));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			// Send reply.
+			InetAddress clientHost = request.getAddress();
+			int clientPort = request.getPort();
+			byte[] buffer = request.getData();
+			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
+			socket.send(reply);
+		}
+
+	}
 
 }
