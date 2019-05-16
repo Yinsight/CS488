@@ -1,0 +1,5 @@
+Q2: Path Latency and Throughput
+
+The expected latency of the path between h1 and h4 should be the sum of all links in between.
+
+The expected throughput of the path between h1 and h4 should be close to the minimum throughput among the links in between.
