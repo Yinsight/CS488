@@ -192,6 +192,8 @@ public class iperfer {
 		serversocket.setSoTimeout(1000); //milliseconds
 		while (true) {
 			Socket clientsocket = serversocket.accept();
+			//client socket timeout
+			clientsocket.setSoTimeout(1000);
 			start = System.nanoTime();
 			try {
 				while (clientsocket.getInputStream().read(data) != -1) {
