@@ -203,7 +203,7 @@ public class iperfer {
 			} catch (SocketTimeoutException e) {
 				accKB = accumulator / 1000;
 				accMB = (accKB * 8) / 1000;
-				throughput = accMB / (elapsed_Time/(10^9) - 1);  //elapsed time minus timeout (1 second)
+				throughput = accMB / (elapsed_Time/(1000000000) - 1);  //elapsed time minus timeout (1 second)
 				System.out.println("Received = " + accKB + "Kb rate = " + throughput + "Mbps");
 			}
 		}
