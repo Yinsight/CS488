@@ -221,7 +221,7 @@ public class pinger {
 			if (random.nextInt(10) < 3) {
 				InetAddress clientHost = request.getAddress();
 				int clientPort = request.getPort();
-				byte[] buffer = request.getData().toString().toUpperCase().getBytes();
+				byte[] buffer = request.getData().toString().getBytes();
 
 				DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
 				serversocket.send(reply);
@@ -235,6 +235,8 @@ public class pinger {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			
 
 			// Send reply.
 			InetAddress clientHost = request.getAddress();
