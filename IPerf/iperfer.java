@@ -46,6 +46,7 @@ public class iperfer {
 		cmd.saveFlagValue("-h"); // host
 		cmd.saveFlagValue("-p"); // port
 		cmd.saveFlagValue("-t"); // time
+		cmd.parse(args);
 
 		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-t") || cmd.numberOfFlags() > 4) {
 			throw new IllegalArgumentException("Error: missing or additional arguments");
