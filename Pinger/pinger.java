@@ -1,7 +1,10 @@
-import java.util.*;
+ import java.util.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -13,7 +16,7 @@ import java.net.UnknownHostException;
 //CommandLine reference:
 //https://commons.apache.org/proper/commons-cli/javadocs/api-1.3.1/org/apache/commons/cli/CommandLine.html
 
-public class pinger {
+public class Pinger {
 
 	static long currentTime; // a counter that runs when program connects
 	static long maxTime = currentTime + 20; // used to check while loop
@@ -22,9 +25,11 @@ public class pinger {
 	static long accKB = 0;
 	static long accMB = 0;
 	static long elapsed_Time = 0; // starts once entered the while loop
+	static long startTime;
 	private static final int AVERAGE_DELAY = 100; // milliseconds
 	static DatagramSocket datagramSocket = null;
 	static long latency; // latency = elapsed-Time - timeout
+	private static final double LOSS_RATE = 0.3; 
 
 	public static boolean checkargs(String[] args) {
 
@@ -82,7 +87,7 @@ public class pinger {
 		return cmd;
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 
 		CommandLine cmd;
 		
@@ -205,7 +210,7 @@ public class pinger {
 			try{
 				
 				DatagramPacket resPacket = new DatagramPacket(new byte[1024], 1024);
-				clientsocket.setSoTimeout(1000);
+				clientsocket.setSoTimeout(10000);
 				clientsocket.receive(resPacket);  //replace null with resPacket
 				elapsed_Time = System.nanoTime() - start;
 				latency = (elapsed_Time/1000000000);
@@ -231,51 +236,70 @@ public class pinger {
 		System.out.println("No. of packets lost "+ nofpacketlost);
 	}
 
-	public static void latencyServer(int port) throws IOException {
-
-		Random random = new Random();
-
-		// Create a datagram socket for receiving and sending UDP packets
-		// through the port specified on the command line.
-		DatagramSocket serversocket = new DatagramSocket(port);
-
-		// Processing loop.
-		while (true) {
-			// Create a datagram packet to hold incoming UDP packet.
-			DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
-
-			// Block until the host receives a UDP packet.
-			serversocket.receive(request);
-
-			// Decide whether to reply, or simulate packet loss.
-			if (random.nextInt(10) < 3) {
-				InetAddress clientHost = request.getAddress();
-				int clientPort = request.getPort();
-				byte[] buffer = request.getData().toString().getBytes();
-
-				DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
-				serversocket.send(reply);
-				continue;
-			}
-
-			// Simulate network delay.
-			try {
-				Thread.sleep((int) (random.nextDouble() * 2 * AVERAGE_DELAY));
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	public static void latencyServer(int port) throws Exception {
+		// Create random number generator for use in simulating
+	      // packet loss and network delay.
+	        Random random = new Random();
+	        int nofpacketlost = 0;
+			int count=0;
+			int sum = 0;
+			long max = 0;
+			long min = 0;		
+			long start = 0;
 			
-			
+			// Create a datagram socket for receiving and sending UDP packets
+		      // through the port specified on the command line.
+		      DatagramSocket serversocket = new DatagramSocket(port);
+		      while(true) {
+		      // Processing loop.
+		      try {
+		         // Create a datagram packet to hold incoming UDP packet.
+		         DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
+			 startTime = System.nanoTime();
+		         // Block until the host receives a UDP packet.
+		         serversocket.setSoTimeout(10000);
+		         serversocket.receive(request);
+		         elapsed_Time = System.nanoTime() - startTime;
+		         latency = (elapsed_Time/1000000000);
+					if(min>latency){
+						min=latency;
+					}
+					
+					if(max<latency){
+						max=latency;
+					}
+		
+					sum+=latency;
+					count++;
 
-			// Send reply.
-			InetAddress clientHost = request.getAddress();
-			int clientPort = request.getPort();
-			byte[] buffer = request.getData();
-			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
-			serversocket.send(reply);
-		}
+		          // Decide whether to reply, or simulate packet loss.
+		         if (random.nextInt(10) < 3) {
+		            InetAddress clientHost = request.getAddress();
+		            int clientPort = request.getPort();
+		            byte[] buffer = request.getData().toString().getBytes();
+
+		            DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
+		            serversocket.send(reply);
+		            continue;
+		         }
+
+		         // Send reply.
+		         InetAddress clientHost = request.getAddress();
+		         int clientPort = request.getPort();
+		         byte[] buffer = request.getData();
+		         DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
+		         serversocket.send(reply);
+		      }
+
+		     catch (SocketTimeoutException e) {
+				 serversocket.close();
+				 System.out.println("Packets in KB = " + count/1000);
+				    System.out.println("Min Latency "+ min);
+					System.out.println("Max Latency "+ max);
+					System.out.println("Average Latency "+ sum/count);
+					System.out.println("No. of packets lost "+ nofpacketlost);
+		     }
+		      }
 
 	}
-
-}
+} 
