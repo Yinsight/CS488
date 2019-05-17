@@ -13,7 +13,7 @@ import java.net.UnknownHostException;
 //CommandLine reference:
 //https://commons.apache.org/proper/commons-cli/javadocs/api-1.3.1/org/apache/commons/cli/CommandLine.html
 
-public class Pinger {
+public class pinger {
 
 	static long currentTime; // a counter that runs when program connects
 	static long maxTime = currentTime + 20; // used to check while loop
