@@ -26,7 +26,7 @@ public class Pinger {
 	static long accMB = 0;
 	static long elapsed_Time = 0; // starts once entered the while loop
 	static long startTime;
-	private static final int AVERAGE_DELAY = 100; // milliseconds
+	
 	static DatagramSocket datagramSocket = null;
 	static long latency; // latency = elapsed-Time - timeout
 	private static final double LOSS_RATE = 0.3;
@@ -223,8 +223,7 @@ public class Pinger {
 						1024);
 				clientsocket.setSoTimeout(1000);
 				clientsocket.receive(resPacket); // replace null with resPacket
-				elapsed_Time = System.currentTimeMillis() - start;
-				latency = (elapsed_Time * 1000);
+				latency= System.currentTimeMillis() - start;
 				totalTime = totalTime + latency;
 				if (min > latency) {
 					min = latency;
@@ -281,10 +280,9 @@ public class Pinger {
 				// decide whether to reply or simulate a packet loss
 				if (random.nextDouble() < LOSS_RATE) {
 					System.out.println(" Reply not sent.");
+					nofpacketlost++;
 					continue;
 				} else {
-					// Simulate network delay.
-					Thread.sleep((int) (random.nextDouble() * 2 * AVERAGE_DELAY));
 					// Send reply.
 					InetAddress clientHost = request.getAddress();
 					int clientPort = request.getPort();
@@ -292,8 +290,7 @@ public class Pinger {
 					DatagramPacket reply = new DatagramPacket(buf, buf.length,
 							clientHost, clientPort);
 					serversocket.send(reply);
-					elapsed_Time = System.currentTimeMillis() - start;
-					latency = (elapsed_Time * 1000);
+					latency = System.currentTimeMillis() - start;
 					totalTime = totalTime + latency;
 					if (min > latency) {
 						min = latency;
@@ -322,6 +319,7 @@ public class Pinger {
 				else {
 					System.out.println("No connection found. Retrying...");
 				}
+				serversocket.close();
 			}
 
 		}
