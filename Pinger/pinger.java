@@ -319,10 +319,10 @@ public class Pinger {
 				else {
 					System.out.println("No connection found. Retrying...");
 				}
-				serversocket.close();
+				break;
 			}
-
+			
 		}
-
+		serversocket.close();
 	}
 }
