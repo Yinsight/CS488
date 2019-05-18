@@ -1,4 +1,4 @@
- import java.util.*;
+import java.util.*;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -29,8 +29,9 @@ public class Pinger {
 	private static final int AVERAGE_DELAY = 100; // milliseconds
 	static DatagramSocket datagramSocket = null;
 	static long latency; // latency = elapsed-Time - timeout
-	private static boolean timeout = true;
+	private static final double LOSS_RATE = 0.3;
 	static int checker = 0;
+	private static boolean timeout = true;
 
 	public static boolean checkargs(String[] args) {
 
@@ -58,14 +59,16 @@ public class Pinger {
 		cmd.saveFlagValue("-n"); // number of packets
 		cmd.parse(args);
 
-		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-n") ) {
-			throw new IllegalArgumentException("Error: missing or additional arguments");
+		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-n")) {
+			throw new IllegalArgumentException(
+					"Error: missing or additional arguments");
 		}
 
 		int port = getInt(cmd.getFlagValue("-p"));
 
 		if (port < 1024 || port > 65535) {
-			//throw new IllegalArgumentException("Error: port number must be in the range of 1024 to 65535");
+			// throw new
+			// IllegalArgumentException("Error: port number must be in the range of 1024 to 65535");
 		}
 		return cmd;
 	}
@@ -77,13 +80,15 @@ public class Pinger {
 		cmd.parse(args);
 
 		if (!cmd.hasFlag("-p") || cmd.numberOfFlags() > 2) {
-			throw new IllegalArgumentException("Error: missing or additional arguments");
+			throw new IllegalArgumentException(
+					"Error: missing or additional arguments");
 		}
 
 		int port = getInt(cmd.getFlagValue("-p"));
 
 		if (port < 1024 || port > 65535) {
-			throw new IllegalArgumentException("Error: port number must be in the range of 1024 to 65535");
+			throw new IllegalArgumentException(
+					"Error: port number must be in the range of 1024 to 65535");
 		}
 		return cmd;
 	}
@@ -91,12 +96,11 @@ public class Pinger {
 	public static void main(String[] args) throws Exception {
 
 		CommandLine cmd;
-		
 
 		if (checkargs(args) == false) {
 
 			cmd = checkargsforClient(args);
-			
+
 			String host = cmd.getFlagValue("-h");
 			int port = getInt(cmd.getFlagValue("-p"));
 			int nofpackets = getInt(cmd.getFlagValue("-n"));
@@ -160,7 +164,8 @@ public class Pinger {
 
 					// Check for flag in flagWithValues and get the next arg as
 					// the value if it exists
-					if (flagsWithValues.contains(args[n]) && n < args.length - 1) {
+					if (flagsWithValues.contains(args[n])
+							&& n < args.length - 1) {
 						value = args[++n];
 					}
 					flags.put(name, value);
@@ -179,91 +184,48 @@ public class Pinger {
 		}
 	}
 
-	public static void latencyClient(String h, int port, int nofpackets) throws IOException {
-		
+	public static void latencyClient(String h, int port, int nofpackets)
+			throws IOException {
+
 		InetAddress host = null;
 		host = InetAddress.getByName(h);
-		
+
 		DatagramSocket clientsocket = new DatagramSocket(port);
-		
-		int nofpacketlost = 0;
-		int count=0;
-		int sum = 0;
-		long max = 0;
-		long min = 1;
-		
-		long start = 0;
-		
-		for (int i = 0; i < nofpackets; i++) {
-			// create string to send 
-			String str = "PING";
-			byte[] buff = new byte[1024];
-			buff=str.getBytes();
-			// Create Datagram packet to send as UDP Packet
-			// check if initialized correctly (port removed) 
-			DatagramPacket ping = new DatagramPacket(buff, buff.length, host, port);
-			// start time (nanoseconds)
-			start = System.nanoTime();
-			
-			// send ping to specified server 
-			clientsocket.send(ping);
-			
-			try{
-				
-				DatagramPacket resPacket = new DatagramPacket(new byte[1024], 1024);
-				clientsocket.setSoTimeout(10000);
-				clientsocket.receive(resPacket);  //replace null with resPacket
-				elapsed_Time = System.nanoTime() - start;
-				latency = (elapsed_Time/1000000000);
-				if(min>latency){
-					min=latency;
-				}
-				if(max<latency){
-					max=latency;
-				}
-				sum+=latency;
-				count++;
-				
-			}catch(SocketTimeoutException e){
-				System.out.println("packet " + i + " timed out.");
-				nofpacketlost++;
-			}
-			
-			}
-		clientsocket.close();
-		System.out.println("Min Latency "+ min);
-		System.out.println("Max Latency "+ max);
-		System.out.println("Average Latency "+ sum/count);
-		System.out.println("No. of packets lost "+ nofpacketlost);
-	}
 
-	private static void latencyServer(int port) throws Exception {
-
-		// Create random number generator for use in simulating
-		// packet loss and network delay.
-		Random random = new Random();
 		int nofpacketlost = 0;
 		int count = 0;
 		int sum = 0;
 		long max = 0;
-		long min = 0;
+		long min = 1;
+		long avgRTT = 0;
+		long totalTime = 0;
 
-		// Create a datagram socket for receiving and sending UDP packets
-		// through the port specified on the command line.
-		DatagramSocket serversocket = new DatagramSocket(port);
-		while (timeout) {
-			// Processing loop.
+		long start = 0;
+
+		for (int i = 0; i < nofpackets; i++) {
+			// create string to send
+			String str = "PING";
+			byte[] buff = new byte[1024];
+			buff = str.getBytes();
+			// Create Datagram packet to send as UDP Packet
+			// check if initialized correctly (port removed)
+			DatagramPacket ping = new DatagramPacket(buff, buff.length, host,
+					port);
+			// start time (nanoseconds)
+			start = System.currentTimeMillis();
+
+			// send ping to specified server
+			clientsocket.send(ping);
+
 			try {
-				// Create a datagram packet to hold incoming UDP packet.
-				DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
 
-				// Block until the host receives a UDP packet.
-				serversocket.setSoTimeout(10000);
-				serversocket.receive(request);
-				checker++;
-				elapsed_Time = endTime - startTime;
-				startTime = System.nanoTime();
-				latency = (elapsed_Time / 1000000000);
+				DatagramPacket resPacket = new DatagramPacket(new byte[1024],
+						1024);
+				clientsocket.setSoTimeout(1000);
+				clientsocket.receive(resPacket); // replace null with resPacket
+				elapsed_Time = System.currentTimeMillis() - start;
+				latency = (elapsed_Time * 1000);
+				totalTime = totalTime + latency;
 				if (min > latency) {
 					min = latency;
 				}
@@ -273,37 +235,87 @@ public class Pinger {
 				sum += latency;
 				count++;
 
-				// Decide whether to reply, or simulate packet loss.
-				if (random.nextInt(10) < 3) {
-					InetAddress clientHost = request.getAddress();
-					int clientPort = request.getPort();
-					byte[] buffer = request.getData().toString().getBytes();
-
-					DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
-					serversocket.send(reply);
-					continue;
-				}
-
-				// Send reply.
-				InetAddress clientHost = request.getAddress();
-				int clientPort = request.getPort();
-				byte[] buffer = request.getData();
-				DatagramPacket reply = new DatagramPacket(buffer, buffer.length, clientHost, clientPort);
-				serversocket.send(reply);
+			} catch (SocketTimeoutException e) {
+				System.out.println("packet " + i + " timed out.");
+				nofpacketlost++;
 			}
 
-			catch (SocketTimeoutException e) {
-				// If sum has a value, calculate latency.
-				// Else if we previously received packets, then client is finished.
-				// Else assume no one connected.
+		}
+		clientsocket.close();
+		avgRTT = totalTime / sum;
+		System.out.println("Average RTT = " + avgRTT);
+		System.out.println("Min Latency = " + min);
+		System.out.println("Max Latency = " + max);
+		System.out.println("Average Latency = " + sum / count);
+		System.out.println("No. of packets lost = " + nofpacketlost);
+	}
+
+	private static void latencyServer(int port) throws Exception {
+		Random random = new Random();
+		int nofpacketlost = 0;
+		int count = 0;
+		int sum = 0;
+		long max = 0;
+		long min = 0;
+		int checker = 0;
+		long start = 0;
+		long totalTime = 0;
+		long avgRTT = 0;
+		// Create a datagram socket for receiving and sending UDP packets
+		// through the port specified on the command line.
+		DatagramSocket serversocket = new DatagramSocket(port); // Processing
+																// loop.
+
+		while (true) {
+			try {
+
+				serversocket.setSoTimeout(10000);
+
+				// Create a datagram packet to hold incomming UDP packet.
+				DatagramPacket request = new DatagramPacket(new byte[1024],
+						1024);
+				// Block until the host receives a UDP packet.
+				start = System.currentTimeMillis();
+				serversocket.receive(request);
+
+				// decide whether to reply or simulate a packet loss
+				if (random.nextDouble() < LOSS_RATE) {
+					System.out.println(" Reply not sent.");
+					continue;
+				} else {
+					// Simulate network delay.
+					Thread.sleep((int) (random.nextDouble() * 2 * AVERAGE_DELAY));
+					// Send reply.
+					InetAddress clientHost = request.getAddress();
+					int clientPort = request.getPort();
+					byte[] buf = request.getData();
+					DatagramPacket reply = new DatagramPacket(buf, buf.length,
+							clientHost, clientPort);
+					serversocket.send(reply);
+					elapsed_Time = System.currentTimeMillis() - start;
+					latency = (elapsed_Time * 1000);
+					totalTime = totalTime + latency;
+					if (min > latency) {
+						min = latency;
+					}
+					if (max < latency) {
+						max = latency;
+					}
+					sum += latency;
+					count++;
+					System.out.println(" Reply sent.");
+				}
+			} catch (SocketTimeoutException e) {
 				if (sum != 0) {
-					System.out.println("Packets in KB = " + packet_reviewed / 1000);
+					avgRTT = totalTime / sum;
+					System.out.println("Average RTT = " + avgRTT);
 					System.out.println("Min Latency " + min);
 					System.out.println("Max Latency " + max);
 					System.out.println("Average Latency " + sum / count);
 					System.out.println("No. of packets lost " + nofpacketlost);
 				} else if (checker > 0) {
-					System.out.println("Timeout. Assume Client is finished. Closing socket.");
+					System.out
+							.println("Timeout. Assume Client is finished. Closing socket.");
 					timeout = false;
 				}
 
@@ -311,7 +323,8 @@ public class Pinger {
 					System.out.println("No connection found. Retrying...");
 				}
 			}
-			serversocket.close();
+
 		}
+
 	}
 }
