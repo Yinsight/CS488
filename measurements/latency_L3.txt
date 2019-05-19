@@ -1,5 +1,5 @@
 
-Min Latency = 61
-Max Latency = 70
-Average Latency = 65
-No. of packets lost = 7
+Min Latency = 61 ms
+Max Latency = 70 ms
+Average Latency = 65 ms
+No. of packets lost = 7 ms
