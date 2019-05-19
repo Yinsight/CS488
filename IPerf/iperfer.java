@@ -48,7 +48,7 @@ public class iperfer {
 		cmd.saveFlagValue("-t"); // time
 		cmd.parse(args);
 
-		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-t") || cmd.numberOfFlags() > 4) {
+		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-t")) {
 			throw new IllegalArgumentException("Error: missing or additional arguments");
 		}
 
@@ -66,7 +66,7 @@ public class iperfer {
 		cmd.saveFlagValue("-p"); // port
 		cmd.parse(args);
 
-		if (!cmd.hasFlag("-p") || cmd.numberOfFlags() > 2) {
+		if (!cmd.hasFlag("-p")) {
 			throw new IllegalArgumentException("Error: missing or additional arguments");
 		}
 
