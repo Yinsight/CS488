@@ -60,8 +60,7 @@ public class Pinger {
 		cmd.parse(args);
 
 		if (!cmd.hasFlag("-h") || !cmd.hasFlag("-p") || !cmd.hasFlag("-n")) {
-			throw new IllegalArgumentException(
-					"Error: missing or additional arguments");
+			throw new IllegalArgumentException("Error: missing or additional arguments");
 		}
 
 		int port = getInt(cmd.getFlagValue("-p"));
@@ -80,15 +79,13 @@ public class Pinger {
 		cmd.parse(args);
 
 		if (!cmd.hasFlag("-p") || cmd.numberOfFlags() > 2) {
-			throw new IllegalArgumentException(
-					"Error: missing or additional arguments");
+			throw new IllegalArgumentException("Error: missing or additional arguments");
 		}
 
 		int port = getInt(cmd.getFlagValue("-p"));
 
 		if (port < 1024 || port > 65535) {
-			throw new IllegalArgumentException(
-					"Error: port number must be in the range of 1024 to 65535");
+			throw new IllegalArgumentException("Error: port number must be in the range of 1024 to 65535");
 		}
 		return cmd;
 	}
@@ -164,8 +161,7 @@ public class Pinger {
 
 					// Check for flag in flagWithValues and get the next arg as
 					// the value if it exists
-					if (flagsWithValues.contains(args[n])
-							&& n < args.length - 1) {
+					if (flagsWithValues.contains(args[n]) && n < args.length - 1) {
 						value = args[++n];
 					}
 					flags.put(name, value);
@@ -196,7 +192,7 @@ public class Pinger {
 		int count = 0;
 		int sum = 0;
 		long max = 0;
-		long min = 1;
+		long min = Integer.MAX_VALUE;
 		long avgRTT = 0;
 		long totalTime = 0;
 
@@ -219,9 +215,8 @@ public class Pinger {
 
 			try {
 
-				DatagramPacket resPacket = new DatagramPacket(new byte[1024],
-						1024);
-				clientsocket.setSoTimeout(1000);
+				DatagramPacket resPacket = new DatagramPacket(new byte[1024],1024);
+				clientsocket.setSoTimeout(10000);
 				clientsocket.receive(resPacket); // replace null with resPacket
 				latency= System.currentTimeMillis() - start;
 				totalTime = totalTime + latency;
@@ -241,8 +236,6 @@ public class Pinger {
 
 		}
 		clientsocket.close();
-		avgRTT = totalTime / sum;
-		System.out.println("Average RTT = " + avgRTT);
 		System.out.println("Min Latency = " + min);
 		System.out.println("Max Latency = " + max);
 		System.out.println("Average Latency = " + sum / count);
@@ -268,11 +261,10 @@ public class Pinger {
 		while (true) {
 			try {
 
-				serversocket.setSoTimeout(10000);
+				serversocket.setSoTimeout(1000);
 
 				// Create a datagram packet to hold incomming UDP packet.
-				DatagramPacket request = new DatagramPacket(new byte[1024],
-						1024);
+				DatagramPacket request = new DatagramPacket(new byte[1024],1024);
 				// Block until the host receives a UDP packet.
 				start = System.currentTimeMillis();
 				serversocket.receive(request);
@@ -303,7 +295,7 @@ public class Pinger {
 					System.out.println(" Reply sent.");
 				}
 			} catch (SocketTimeoutException e) {
-				if (sum != 0) {
+				/*if (sum != 0) {
 					avgRTT = totalTime / sum;
 					System.out.println("Average RTT = " + avgRTT);
 					System.out.println("Min Latency " + min);
@@ -318,11 +310,11 @@ public class Pinger {
 
 				else {
 					System.out.println("No connection found. Retrying...");
-				}
+				}*/
 				break;
 			}
 			
 		}
 		serversocket.close();
 	}
-}
+} 
