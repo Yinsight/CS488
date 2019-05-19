@@ -194,7 +194,7 @@ public class iperfer {
 		while (true) {
 			Socket clientsocket = serversocket.accept();
 			//client socket timeout
-			clientsocket.setSoTimeout(1000);
+			serversocket.setSoTimeout(10000);
 			start = System.nanoTime();
 			try {
 				while (clientsocket.getInputStream().read(data) != -1) {
@@ -206,9 +206,10 @@ public class iperfer {
 				accMB = (accKB * 8) / 1000;
 				throughput = accMB / (elapsed_Time/(1000000000) - 1);  //elapsed time minus timeout (1 second)
 				System.out.println("Received = " + accKB + "Kb rate = " + throughput + "Mbps");
+				break();
 			}
 		}
-
+		serversocket.close();
 	}
 
 }
