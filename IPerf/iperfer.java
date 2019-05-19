@@ -190,7 +190,7 @@ public class iperfer {
 		InetAddress host = InetAddress.getByName("localhost");
 		ServerSocket serversocket = new ServerSocket(port, 1, host);
 		currentTime = System.nanoTime();
-		serversocket.setSoTimeout(1000); //milliseconds
+		serversocket.setSoTimeout(10000); //milliseconds
 		while (true) {
 			Socket clientsocket = serversocket.accept();
 			//client socket timeout
