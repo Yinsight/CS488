@@ -206,7 +206,7 @@ public class iperfer {
 				accMB = (accKB * 8) / 1000;
 				throughput = accMB / (elapsed_Time/(1000000000) - 1);  //elapsed time minus timeout (1 second)
 				System.out.println("Received = " + accKB + "Kb rate = " + throughput + "Mbps");
-				break();
+				break;
 			}
 		}
 		serversocket.close();
