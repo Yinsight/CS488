@@ -1,0 +1,17 @@
+ANSWERS
+
+1)	All measurements for latency using Pinger were found to have a difference of less than 10%
+
+2)	Average Latency for L1 = 86
+Average Latency for L2 = 23
+Average Latency for L3  = 63 
+
+Adding all three comes to 172
+
+When I sent 20 packets between h1 and h4 we got the following result. 
+Min Latency = 164
+Max Latency = 172
+Average Latency = 165 
+No. of packets lost = 6
+
+Thus, it shows that as predicted the average latency is under 10% of 174
