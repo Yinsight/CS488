@@ -1,0 +1,9 @@
+
+Min Latency = 81
+Max Latency = 96
+Average Latency = 86
+No. of packets lost = 6
+
+Ping:
+
+rtt min/avg/max/msdev = 83.429/85.732/86.370/0.658 ms
