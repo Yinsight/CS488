@@ -1,5 +1,8 @@
 
 Min Latency = 22 ms
-Max Latency = 29 ms
-Average Latency = 24 ms
-No. of packets lost = 1
+Max Latency = 30 ms
+Average Latency = 23 ms
+No. of packets lost = 6
+
+Ping: 
+rtt min/avg/max/mdev = 23.356/23.597/27.024/0.755 ms
