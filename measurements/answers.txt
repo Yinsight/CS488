@@ -17,3 +17,9 @@ Average Latency = 165
 No. of packets lost = 6
 
 Thus, it shows that as predicted the average latency is under 10% of 174
+
+
+
+Q2 Prediction for Throughput:
+
+The expected throughput of the path between h1 and h4 should be close to the minimum throughput among the links in between.
